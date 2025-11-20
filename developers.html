@@ -46,7 +46,6 @@
   .modal-head h3{ margin:0; font-size:1.1rem; }
   .modal-body{ margin-top:12px; color:var(--muted); white-space: pre-line; font-family:'Times New Roman', Times, serif; font-style:italic; }
   body.dark .modal-body{ color:var(--muted-dark) }
-  .modal-close{ background:transparent; border:none; font-size:18px; cursor:pointer }
 
   .top-controls{ position:fixed; right:16px; top:auto; bottom:16px; z-index:101; }
   .theme-btn{ width:46px; height:46px; border-radius:12px; display:grid; place-items:center; cursor:pointer; border:1px solid rgba(16,24,40,0.06); background:linear-gradient(180deg,#fff,#f4f8ff); box-shadow:0 8px 22px rgba(16,24,40,0.06); transition:transform .2s ease }
@@ -76,7 +75,6 @@
   <div class="modal-card">
     <div class="modal-head">
       <h3 id="modalTitle">Title</h3>
-      <button class="modal-close" onclick="closeModal()">✖</button>
     </div>
     <div class="modal-body" id="modalBody"></div>
   </div>
