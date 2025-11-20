@@ -1148,7 +1148,10 @@
         </div>
       </div>
 
-      <input id="reg_phone" type="tel" placeholder="Number">
+      <!-- keep selected country code separately — do NOT place it into the phone input -->
+      <input type="hidden" id="reg_country_code" value="+91">
+
+      <input id="reg_phone" type="tel" placeholder="Country Code + Phone Number">
       <button id="sendPhone" class="otp-btn" type="button" aria-label="Send phone OTP">📩</button>
       <input id="reg_phone_otp" placeholder="OTP">
       <button id="validatePhone" class="otp-btn" type="button" aria-label="Validate phone OTP">✔️</button>
@@ -1290,27 +1293,67 @@ document.addEventListener('click', (e)=>{
 
 // ensure filter works + initialize selected country into phone input
 (function countryInit(){
-  if(!countryList) return;
-  // ensure any pre-marked selected item is applied to toggle and phone
-  const pre = countryList.querySelector('.country-item[selected], .country-item[aria-selected="true"]');
-  if(pre){
-    try{
-      countryToggle.querySelector('span').innerText = pre.innerText.trim();
-      document.getElementById('reg_phone').value = pre.getAttribute('data-value') || '';
-    }catch(e){}
-  }
+    if(!countryList) return;
+    // ensure any pre-marked selected item is applied to toggle and phone
+    const pre = countryList.querySelector('.country-item[selected], .country-item[aria-selected="true"]');
+    if(pre){
+      try{
+      // show name only in toggle and store code in hidden field (do NOT put code into visible phone input)
+      countryToggle.querySelector('span').innerText = (pre.querySelector('span')?.innerText || pre.innerText).trim();
+      document.getElementById('reg_country_code').value = pre.getAttribute('data-value') || '';
+      }catch(e){}
+    }
+ 
+    // keep existing filter logic (it now hides via .country-item.hidden)
+    countryFilter.oninput = ()=>{
+      const filter = (countryFilter.value || '').toLowerCase().trim();
+      const items = countryList.querySelectorAll('.country-item');
+      items.forEach(item=>{
+        const text = (item.innerText || '').toLowerCase();
+        item.classList.toggle('hidden', !text.includes(filter));
+      });
+    };
+  })();
+ 
+ // try to auto-detect user country via IP (no prompt). uses ipapi.co — falls back silently on error.
+ async function detectCountryByIP(){
+   if(!countryList) return;
+   try{
+     const res = await fetch('https://ipapi.co/json/');
+     if(!res.ok) return;
+     const data = await res.json();
+     const name = (data.country_name || data.country || '').toLowerCase();
+     const calling = (data.country_calling_code || '').replace(/\s|‑/g,''); // e.g. "+1"
 
-  // keep existing filter logic (it now hides via .country-item.hidden)
-  countryFilter.oninput = ()=>{
-    const filter = (countryFilter.value || '').toLowerCase().trim();
-    const items = countryList.querySelectorAll('.country-item');
-    items.forEach(item=>{
-      const text = (item.innerText || '').toLowerCase();
-      item.classList.toggle('hidden', !text.includes(filter));
-    });
-  };
-})();
-  
+     // match by visible country name first
+     const nodes = Array.from(countryList.querySelectorAll('.country-item'));
+     let match = nodes.find(n => {
+       const nName = (n.querySelector('span')?.innerText || '').toLowerCase();
+       return name && nName.includes(name);
+     });
+
+     // otherwise match by calling code
+     if(!match && calling){
+       match = nodes.find(n=>{
+         const v = (n.getAttribute('data-value')||'').replace(/-+/g,'');
+         // normalize to forms like "+1" or "+91"
+         const normalized = v;
+         return normalized === calling || normalized.startsWith(calling) || calling.startsWith(normalized);
+       });
+     }
+
+     if(match){
+       const value = match.getAttribute('data-value') || '';
+       countryToggle.querySelector('span').innerText = (match.querySelector('span')?.innerText || match.innerText).trim();
+       document.getElementById('reg_country_code').value = value;
+     }
+   }catch(e){
+     /* ignore network errors or CORS failures — detection is optional */
+   }
+ }
+ // run detection after init
+ detectCountryByIP();
+   
 // Select country item
 countryList.onclick = (e)=>{
   const item = e.target.closest('.country-item');
@@ -1318,11 +1361,11 @@ countryList.onclick = (e)=>{
   const value = item.getAttribute('data-value');
   const text = item.innerText.trim();
   countryToggle.querySelector('span').innerText = text;
-  reg_phone.value = value;
+  // store selected country code separately; DO NOT inject into the visible phone input
+  document.getElementById('reg_country_code').value = value || '';
   countryList.classList.add('hidden');
   countryList.setAttribute('aria-expanded','false');
 };
-
 </script>
 
 </body>
