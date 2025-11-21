@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Lifetime Access — Pixel UI</title>
+<style>
+  :root{
+    --bg:#e9eef8; --muted:#6b7280; --accent:#2563eb; --glass: rgba(255,255,255,0.6);
+    --bg-dark:#071019; --muted-dark:#9aa6b2; --glass-dark: rgba(255,255,255,0.03);
+    /* offer border color that follows theme */
+    --offer-border: rgba(16,24,40,0.06);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; padding:0; font-family:'Times New Roman', Times, serif; font-style:italic;}
+  body{
+    background:linear-gradient(180deg,var(--bg),#f6fbff);
+    transition:background-color .45s ease,color .4s ease;
+    color:#0f172a; display:flex; align-items:center; justify-content:center; padding:16px;
+    min-height:100vh;
+  }
+  /* dark theme overrides */
+  body.dark{ background: linear-gradient(180deg,var(--bg-dark),#021016); color:var(--muted-dark);
+    /* switch the offer border for dark mode */
+    --offer-border: rgba(255,255,255,0.08);
+  }
+
+  .card{
+    width:100%; max-width:520px; border-radius:14px; padding:22px;
+    backdrop-filter: blur(10px) saturate(120%); box-shadow: 0 12px 36px rgba(16,24,40,0.10);
+    background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.45)); transition:all .3s ease;
+    text-align:center;
+  }
+  body.dark .card{ background: linear-gradient(180deg,var(--glass-dark), rgba(255,255,255,0.02)); box-shadow:0 12px 40px rgba(2,6,23,0.6); }
+
+  h1{margin:0 0 8px 0; font-size:1.4rem;}
+  p.lead{ margin:0 0 18px 0; color:var(--muted); }
+
+  .offer{
+    display:flex; align-items:center; justify-content:center; gap:16px; padding:12px 16px;
+    border-radius:12px; background:linear-gradient(180deg,#fff,#f8fbff);
+    border:1px solid var(--offer-border);
+    transition: border-color .18s ease, box-shadow .18s ease;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.03);
+  }
+  .price{ font-weight:800; font-size:1.45rem; color:var(--accent); }
+  .desc{ color:var(--muted); font-size:0.95rem }
+
+  .buy-btn{
+    margin-top:18px;
+    padding:12px 20px; border-radius:12px; background:var(--accent); color:#fff; border:none;
+    cursor:pointer; font-weight:700; font-size:1rem;
+  }
+
+  .note{ margin-top:12px; font-size:0.85rem; color:var(--muted) }
+
+  .modal{ position:fixed; inset:0; display:grid; place-items:center; background: rgba(2,6,23,0.46); opacity:0; pointer-events:none; transition:opacity .28s ease; z-index:150; }
+  .modal.open{ opacity:1; pointer-events:auto; }
+  .modal-card{ width:92%; max-width:420px; border-radius:12px; padding:16px; background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9)); box-shadow:0 20px 50px rgba(2,6,23,0.18); }
+  .modal-card p{margin:0 0 8px 0; color:var(--muted)}
+
+  .bottom-controls{ position:fixed; right:18px; bottom:18px; z-index:200; }
+  .theme-btn{ width:46px; height:46px; border-radius:12px; display:grid; place-items:center; cursor:pointer; border:1px solid rgba(16,24,40,0.06); background:linear-gradient(180deg,#fff,#f4f8ff); box-shadow:0 8px 22px rgba(16,24,40,0.06); }
+  body.dark .theme-btn{ background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.04); }
+
+  @media (max-width:480px){
+    .card{padding:16px; transform:scale(0.95)}
+    .price{font-size:1.25rem}
+    .buy-btn{width:100%}
+    html,body{overflow-x:auto; -webkit-overflow-scrolling:touch}
+    /* center card fully on mobile */
+    body{align-items:center; justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="bottom-controls">
+    <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">🌙</button>
+  </div>
+
+  <div class="card" role="region" aria-label="Lifetime purchase">
+    <h1>Subscriptions</h1>
+    <p class="lead">One-time payment — full access to the site</p>
+
+    <div class="offer" aria-hidden="false">
+      <div>
+        <div class="price">$5</div>
+        <div class="desc">Lifetime package — one-time</div>
+      </div>
+    </div>
+
+    <button id="buyLifetime" class="buy-btn" aria-label="Buy lifetime package for $5">Buy Lifetime — $5</button>
+
+    <p class="note">Payments processed securely by Stripe. You will be redirected to a secure checkout.</p>
+  </div>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-card">
+      <p id="modalText">Processing payment...</p>
+      <div style="text-align:right; margin-top:8px;"><button id="modalClose" style="padding:8px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer">Close</button></div>
+    </div>
+  </div>
+
+<!-- Stripe JS (include when using real publishable key) -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+/* Replace STRIPE_PUBLISHABLE_KEY with your Stripe publishable key */
+const STRIPE_PUBLISHABLE_KEY = 'pk_test_REPLACE_ME';
+let stripe = null;
+if(window.Stripe && STRIPE_PUBLISHABLE_KEY && STRIPE_PUBLISHABLE_KEY.startsWith('pk_')){
+  stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+}
+
+/* UI elements */
+const buyBtn = document.getElementById('buyLifetime');
+const modal = document.getElementById('modal');
+const modalText = document.getElementById('modalText');
+const modalClose = document.getElementById('modalClose');
+
+function openModal(txt){ modalText.textContent = txt; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
+function closeModal(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+
+modalClose.addEventListener('click', closeModal);
+modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
+
+/* Click handler: create Checkout session on server then redirect to Stripe Checkout.
+   Server endpoint required: POST /create-checkout-session
+   Body: { product: 'lifetime', price_cents: 500, currency: 'usd' }
+   Server must call Stripe server-side API to create a Checkout Session and return { sessionId }.
+   Also implement webhook to verify payment and grant access.
+*/
+buyBtn.addEventListener('click', async () => {
+  buyBtn.disabled = true;
+  openModal('Creating secure checkout session…');
+
+  try {
+    const res = await fetch('/create-checkout-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ product: 'lifetime', price_cents: 500, currency: 'usd' })
+    });
+
+    if(!res.ok) throw new Error('Server responded with ' + res.status);
+    const data = await res.json();
+    if(!data.sessionId) throw new Error('No sessionId in server response');
+
+    // Redirect to Stripe Checkout
+    if(!stripe) throw new Error('Stripe.js not initialized. Set STRIPE_PUBLISHABLE_KEY and include Stripe.js.');
+    const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+    if(error) throw error;
+
+  } catch (err) {
+    console.error(err);
+    openModal('Failed to create checkout session. For demo, a local purchase will be simulated.');
+    // Demo fallback: simulate success (client-side only)
+    setTimeout(()=>{
+      openModal('Demo purchase completed locally. Implement server-side session creation + webhooks for production.');
+    }, 900);
+  } finally {
+    buyBtn.disabled = false;
+  }
+});
+
+/* Theme toggle — same behavior and storage key as auth.html / roadmap.html */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(theme){
+  if(theme==='dark') document.body.classList.add('dark'); else document.body.classList.remove('dark');
+  themeToggle.textContent = theme==='dark' ? '☀️' : '🌙';
+  localStorage.setItem('cpp_theme', theme);
+}
+themeToggle.addEventListener('click', ()=>{
+  const cur = document.body.classList.contains('dark') ? 'dark' : 'light';
+  applyTheme(cur==='dark' ? 'light' : 'dark');
+});
+(function(){
+  const saved = localStorage.getItem('cpp_theme');
+  if(saved) applyTheme(saved);
+  else applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+})();
+</script>
+</body>
+</html>
