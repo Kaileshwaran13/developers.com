@@ -56,12 +56,14 @@ h1 { font-size:2rem; color:var(--accent); text-align:center; margin-bottom:16px;
 .section-content.open { overflow-y:auto; padding:12px; }
 
 .quests { display:flex; flex-direction:column; gap:6px; }
-.quest { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; display:flex; align-items:center; gap:12px; transition: all 0.3s ease; }
-.quest.done { opacity:.6; text-decoration: line-through; }
+.quest { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; display:flex; align-items:center; gap:12px; transition: all 0.3s ease; user-select:none; }
+.quest.done span { opacity:0.6; text-decoration: none; } /* partially faded, not fully strikethrough */
+.drag-handle { cursor:grab; user-select:none; color:var(--muted); font-weight:bold; }
 .check { width:24px; height:24px; border-radius:6px; border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all 0.25s; flex-shrink:0; }
 .check.checked { background:var(--accent); box-shadow:0 0 14px rgba(79,195,255,.8); }
 .check.checked::after { content:'✓'; color:#000; font-weight:700; animation:pop .25s ease-out; }
 @keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
+.delete-btn { margin-left:auto; cursor:pointer; color:var(--danger); font-weight:bold; }
 
 .footer { margin-top:16px; text-align:center; font-size:.8rem; color:var(--muted); width:100%; }
 .timeline { margin-top:16px; font-size:0.9rem; color:var(--muted); text-align:center; width:100%; display:flex; justify-content:space-between; }
@@ -75,7 +77,6 @@ h1 { font-size:2rem; color:var(--accent); text-align:center; margin-bottom:16px;
 #passwordOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:black; display:flex; justify-content:center; align-items:center; z-index:1000; flex-direction:column; }
 #passwordOverlay input { padding:12px; font-size:1.2rem; border-radius:8px; border:none; background:#111; color:#fff; text-align:center; width:220px; }
 #passwordOverlay span { color:red; margin-top:12px; font-size:1rem; opacity:0; transition:opacity 0.3s; }
-
 </style>
 </head>
 <body>
@@ -221,13 +222,18 @@ function updateTimeline(){
   document.getElementById('missedStreak').textContent=`Missed Days: ${missedDays}`;
 }
 
-// Todo Section (fixed)
+// Todo Section (with delete and drag)
 function buildTodo(){
   const todoList=document.getElementById('todoList'); 
   todoList.innerHTML='';
-  todoTasks.forEach(task=>{
+  todoTasks.forEach((task,index)=>{
     const div=document.createElement('div'); 
     div.className='quest';
+    div.draggable = true;
+
+    const dragHandle = document.createElement('span');
+    dragHandle.className='drag-handle';
+    dragHandle.textContent='::';
 
     const checkBox=document.createElement('div');
     checkBox.className='check';
@@ -236,14 +242,50 @@ function buildTodo(){
     const span=document.createElement('span');
     span.textContent = task.text;
 
+    const deleteBtn = document.createElement('span');
+    deleteBtn.className='delete-btn';
+    deleteBtn.textContent='✕';
+
+    // Events
     checkBox.addEventListener('click', ()=>{
       task.done = !task.done;
       checkBox.classList.toggle('checked');
+      buildTodo(); // re-render to update opacity
       saveData();
     });
 
+    deleteBtn.addEventListener('click', ()=>{
+      todoTasks.splice(index,1);
+      buildTodo();
+      saveData();
+    });
+
+    // Drag & Drop
+    div.addEventListener('dragstart', (e)=>{
+      e.dataTransfer.setData('text/plain', index);
+      e.currentTarget.style.opacity=0.4;
+    });
+    div.addEventListener('dragend', (e)=>{
+      e.currentTarget.style.opacity=1;
+    });
+    div.addEventListener('dragover', (e)=>{
+      e.preventDefault();
+    });
+    div.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIndex = index;
+      if(fromIndex === toIndex) return;
+      const movedItem = todoTasks.splice(fromIndex,1)[0];
+      todoTasks.splice(toIndex,0,movedItem);
+      buildTodo();
+      saveData();
+    });
+
+    div.appendChild(dragHandle);
     div.appendChild(checkBox);
     div.appendChild(span);
+    div.appendChild(deleteBtn);
     todoList.appendChild(div);
   });
 }
