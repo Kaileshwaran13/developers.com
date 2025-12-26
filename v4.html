@@ -85,7 +85,7 @@ h1 {
 .footer { margin-top:12px; text-align:center; font-size:.7rem; color:var(--muted); width:100%; }
 .timeline { margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center; width:100%; display:flex; justify-content:space-between; }
 .timeline div { flex:1; text-align:center; }
-.todo-input { width:100%; display:flex; gap:5px; }
+.todo-input { width:100%; display:flex; gap:5px; margin-bottom:5px; }
 .todo-input input { flex:1; padding:5px; border-radius:6px; border:1px solid #1c2a44; background:var(--panel); color:var(--text); }
 .todo-input button { padding:5px 10px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; }
 </style>
@@ -111,7 +111,7 @@ h1 {
     <div class="section-content" id="todoContent">
       <div class="todo-input">
         <input type="text" id="newTask" placeholder="Add new task and press Enter">
-        <button onclick="addTodo()">Add</button>
+        <button id="addTaskBtn">Add</button>
       </div>
       <div id="todoList" class="quests"></div>
     </div>
@@ -128,6 +128,15 @@ h1 {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
+// --- PASSWORD PROTECTION ---
+const password = prompt("Enter password to access:");
+if(password !== "K@ilesh13"){
+    alert("Unauthorized access! You cannot view this page.");
+    document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:50px;'>Unauthorized Access</h2>";
+    throw new Error("Unauthorized access");
+}
+
+// --- FIREBASE ---
 const firebaseConfig = {
   projectId: "solo-leveling-36aca",
   databaseURL: "https://solo-leveling-36aca-default-rtdb.firebaseio.com"
@@ -136,13 +145,15 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const userId = 'defaultUser';
 
+// --- SYSTEM DATA ---
 let level=1, exp=0, expNeeded=100, str=0, end=0, completed=[], streakDays=0, missedDays=0;
 const baseQuests=[
   ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'], ['Dips',100,'reps'], ['Inverted Rows',100,'reps'],
   ['Russian Twist',100,'reps'], ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'], ['Plank',3,'mins'],
-  ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins']
+  ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'], ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
 ];
 
+// --- UI HELPERS ---
 function getMultiplier(){ return 1+(level-1)*0.05; }
 function getRank(totalExp){
   if(totalExp<10000) return 'E'; if(totalExp<20000) return 'D'; if(totalExp<30000) return 'C';
@@ -160,6 +171,7 @@ window.toggleSection = function(id){
   }
 }
 
+// --- LOAD FIREBASE DATA ---
 async function loadData(){
   try {
     const snapshot = await get(ref(db, 'users/' + userId));
@@ -184,6 +196,7 @@ function saveData(){
   set(ref(db, 'users/' + userId), {level, exp, expNeeded, str, end, completed, streakDays, missedDays});
 }
 
+// --- WORKOUTS ---
 function buildQuests(){
   const wrap = document.getElementById('workoutsContent');
   wrap.innerHTML = '';
@@ -212,6 +225,7 @@ window.toggleQuest = function(box){
   updateTimeline();
 }
 
+// --- UI UPDATE ---
 function updateUI(){
   document.getElementById('level').textContent = level;
   document.getElementById('rank').textContent = getRank(level*10);
@@ -225,6 +239,7 @@ function updateTimeline(){
   document.getElementById('missedStreak').textContent = `Missed Days: ${missedDays}`;
 }
 
+// --- TO DO ---
 function addTodo(){
   const input = document.getElementById('newTask');
   const val = input.value.trim();
@@ -237,8 +252,10 @@ function addTodo(){
   input.value='';
 }
 
+document.getElementById('addTaskBtn').addEventListener('click', addTodo);
 document.getElementById('newTask').addEventListener('keydown', e=>{ if(e.key==='Enter') addTodo(); });
 
+// --- INITIALIZE ---
 loadData();
 </script>
 </body>
