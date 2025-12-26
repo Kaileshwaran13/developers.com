@@ -1,1372 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Auth Page — Pixel UI Glassmorphism (Responsive Fix)</title>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Solo Leveling – Daily System</title>
 <style>
-  :root{
-    --bg:#e9eef8; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --glass: rgba(255,255,255,0.6);
-    --bg-dark:#071019; --card-dark: rgba(22,27,34,0.85); --muted-dark:#9aa6b2; --accent-dark:#58a6ff; --glass-dark: rgba(255,255,255,0.03);
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%; margin:0; padding:0; font-family:'Times New Roman',serif; font-style:italic;}
-  body{
-    background:linear-gradient(180deg,var(--bg),#f6fbff);
-    transition:background-color .6s ease,color .5s ease;
-    display:flex; align-items:center; justify-content:center;
-    min-height:100vh; padding:16px;
-    color:#0f172a;
-  }
-  body.dark{ background: linear-gradient(180deg,var(--bg-dark),#021016); color:var(--muted-dark) }
-
-  .auth-container{
-    width:100%; max-width:920px;
-    background:linear-gradient(180deg,var(--glass),rgba(255,255,255,0.45));
-    backdrop-filter:blur(10px) saturate(130%);
-    border-radius:20px; padding:24px 28px;
-    box-shadow:0 12px 40px rgba(16,24,40,0.12);
-    transition:.5s ease;
-    overflow:hidden;
-    transform-origin:center center;
-    margin:auto;
-  }
-  body.dark .auth-container{
-    background:linear-gradient(180deg,var(--glass-dark),rgba(255,255,255,0.02));
-    box-shadow:0 12px 40px rgba(2,6,23,0.6);
-  }
-
-  h2{text-align:center; margin-top:0; margin-bottom:20px; font-size:1.5rem;}
-
-  .tabs{display:flex; justify-content:center; gap:10px; margin-bottom:20px;}
-  .tab-btn{
-    padding:10px 18px; border-radius:14px; cursor:pointer; border:1px solid rgba(16,24,40,0.06);
-    background:rgba(255,255,255,0.6); box-shadow:0 6px 18px rgba(16,24,40,0.04);
-    transition:.3s; user-select:none;
-  }
-  .tab-btn:hover{transform:translateY(-3px)}
-  .tab-btn.active{background:var(--accent); color:white}
-  body.dark .tab-btn{background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08)}
-
-  .input-group{display:flex; flex-direction:column; margin-bottom:14px;}
-  label{margin-bottom:6px; font-size:0.95rem}
-  input{
-    padding:12px; border-radius:12px; border:1px solid rgba(16,24,40,0.1);
-    background:rgba(255,255,255,0.7); font-size:1rem; width:100%; min-width:0;
-  }
-  body.dark input{background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.05); color:white}
-
-  .otp-btn{
-    padding:8px 10px; border-radius:10px; background:var(--accent); color:white;
-    cursor:pointer; border:none; font-style:normal; min-width:44px;
-  }
-
-  .submit-btn{
-    margin-top:10px; width:100%; padding:12px; border:none;
-    border-radius:14px; cursor:pointer; background:var(--accent); color:white; font-size:1.05rem;
-  }
-
-  /* Animated panel behavior (smooth transition between register/login) */
-  .panel{
-    transition: opacity .36s cubic-bezier(.2,.9,.2,1), transform .36s cubic-bezier(.2,.9,.2,1), max-height .36s ease;
-    overflow:hidden;
-    opacity:1;
-    transform:translateY(0);
-    max-height:1200px; /* large enough to accommodate content */
-  }
-  .panel.hidden{
-    opacity:0;
-    transform:translateY(8px);
-    max-height:0;
-    pointer-events:none;
-  }
-
-  /* THEME TOGGLE FIX — bottom right */
-  .theme-toggle{
-    position:fixed;
-    bottom:14px;
-    right:14px;
-    background:linear-gradient(180deg,#fff,#f4f8ff);
-    border:1px solid rgba(16,24,40,0.06);
-
-    /* make square */
-    width:44px;
-    height:44px;
-    padding:0;
-    display:inline-grid;
-    place-items:center;
-    border-radius:6px; /* set to 0 for perfectly sharp corners */
-    cursor:pointer; z-index:2000;
-  }
-  body.dark .theme-toggle{
-    background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-    border:1px solid rgba(255,255,255,0.12);
-    color:var(--accent-dark);
-
-    /* match dark style to square shape */
-    width:44px;
-    height:44px;
-    padding:0;
-    border-radius:6px;
-  }
-
-  /* GRID */
-  .input-row{display:grid; gap:10px; align-items:center; width:100%; grid-auto-flow:column}
-  .input-row > *{min-width:0;}
-
-  .email-row{grid-template-columns:120px minmax(180px,1fr) auto minmax(120px,180px) auto}
-  .phone-row{grid-template-columns:120px 80px minmax(140px,1fr) auto minmax(120px,160px) auto}
-  
-  /* --- Add responsive, modern glass-style country select --- */
-  .country-select{
-    -webkit-appearance:none;
-    appearance:none;
-    height:44px;
-    padding:10px 12px;
-    border-radius:12px;
-    box-sizing:border-box;
-
-    /* glass look */
-    background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.06));
-    border: 1px solid rgba(255,255,255,0.45);
-    backdrop-filter: blur(8px) saturate(120%);
-    -webkit-backdrop-filter: blur(8px) saturate(120%);
-    box-shadow: 0 6px 18px rgba(16,24,40,0.06);
-
-    color: inherit;
-    font-size:0.95rem;
-    cursor:pointer;
-
-    /* size constraints so it fits the UI */
-    width:160px;
-    min-width:110px;
-    max-width:220px;
-
-    /* custom arrow (keeps native behaviour but hides default) */
-    background-image:
-      linear-gradient(45deg, transparent 50%, rgba(0,0,0,0.12) 50%),
-      linear-gradient(135deg, rgba(0,0,0,0.12) 50%, transparent 50%);
-    background-position: calc(100% - 18px) calc(50% - 3px), calc(100% - 12px) calc(50% - 3px);
-    background-size: 6px 6px, 6px 6px;
-    background-repeat: no-repeat;
-    padding-right:36px; /* room for arrow */
-  }
-
-  .country-select:focus{
-    outline: none;
-    border-color: rgba(37,99,235,0.9);
-    box-shadow: 0 4px 14px rgba(37,99,235,0.12), 0 0 0 4px rgba(37,99,235,0.06);
-  }
-
-  /* dark mode variant */
-  body.dark .country-select{
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    border: 1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 6px 18px rgba(2,6,23,0.55);
-    color:var(--muted-dark);
-  }
-
-  /* make country select full width on small screens and adjust grid for phone row */
-  @media (max-width:760px){
-    .phone-row{ grid-template-columns: 1fr !important; grid-auto-flow:row; }
-    .country-select{ width:100%; max-width:100%; }
-    .phone-row > input, .phone-row > .otp-btn { width:100%; }
-    .phone-row .otp-btn{ justify-self:start; }
-  }
-
-  /* slightly narrower select on medium screens */
-  @media (max-width:920px) and (min-width:761px){
-    .country-select{ width:140px; max-width:180px; }
-  }
-
-  /* adjust desktop phone-row layout to allocate a fixed slot for country select */
-  .phone-row{ grid-template-columns:120px 160px minmax(140px,1fr) auto minmax(120px,160px) auto; }
-
-  /* Medium screens */
-  @media (max-width:920px){
-    .auth-container{max-width:820px}
-    .email-row{grid-template-columns:110px minmax(160px,1fr) 80px minmax(100px,160px) 60px}
-    .phone-row{grid-template-columns:110px 70px minmax(120px,1fr) 80px minmax(100px,140px) 60px}
-  }
-
-  /* MOBILE FIX — stacking + centering */
-  @media (max-width:760px){
-    body{padding-top:32px; padding-bottom:32px}
-    .auth-container{
-      padding:18px;
-      transform:scale(0.95);
-      margin:0 auto;
-      transform-origin:center center;
-    }
-    .email-row, .phone-row, .user-row, .pass-row{
-      grid-template-columns:1fr !important;
-      grid-auto-flow:row;
-    }
-    .input-row{row-gap:10px}
-
-    /* toggle bottom right */
-    .theme-toggle{ bottom:12px; right:12px; top:auto; }
-  }
-
-  @media (max-width:420px){
-    .auth-container{
-      transform:translateX(0) scale(0.82);
-      max-width:420px;
-      margin:0 auto;
-    }
-    .tab-btn{padding:8px 12px}
-    .otp-btn{padding:8px}
-    .submit-btn{padding:10px; font-size:1rem}
-    html,body{overflow-x:auto; -webkit-overflow-scrolling:touch}
-    .theme-toggle{ bottom:10px; right:10px; top:auto; }
-  }
-
-  @media (max-width:360px){
-    .auth-container{
-      transform:translateX(0) scale(0.78);
-    }
-    .theme-toggle{ transform:scale(.95); bottom:10px; }
-  }
-
-  /* add after .country-select / media rules inside <style> */
-  .country-wrapper{ position:relative; display:inline-block; vertical-align:middle; box-sizing:border-box; }
-  .country-toggle{
-    display:flex; align-items:center; gap:8px;
-    width:160px; min-width:110px; max-width:220px;
-    height:44px; padding:10px 12px; border-radius:12px;
-    background:linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
-    border:1px solid rgba(255,255,255,0.45);
-    backdrop-filter:blur(8px) saturate(120%); -webkit-backdrop-filter:blur(8px) saturate(120%);
-    box-shadow:0 6px 18px rgba(16,24,40,0.05);
-    cursor:pointer; color:inherit; font-size:0.95rem; text-align:left;
-    justify-content:space-between;
-  }
-  body.dark .country-toggle{
-    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.06);
-    box-shadow: 0 6px 18px rgba(2,6,23,0.55);
-  }
-  .country-toggle:focus{ outline:none; box-shadow:0 6px 18px rgba(37,99,235,0.12); border-color:rgba(37,99,235,0.9); }
-
-  /* glass-style dropdown list — simplified: only strong blur, no mirrored highlight */
-  .country-list{
-    position:absolute;
-    left:0;
-    top:calc(100% + 8px);
-    width:100%;
-    max-height:300px;
-    overflow:auto;
-    border-radius:12px;
-
-    /* simplified: dark panel with a normal blur (no glossy/mirror effects) */
-    background: rgba(0,0,0,0.65); /* strong dark panel */
-    border: 1px solid rgba(255,255,255,0.04);
-    backdrop-filter: blur(10px); /* normal blur */
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 12px 30px rgba(2,8,23,0.55);
-    z-index:1400;
-    padding:6px;
-    transform-origin:top center;
-    transition:opacity .18s ease, transform .18s ease;
-    opacity:1;
-    transform:translateY(0);
-    color:#ffffff; /* white text on dark background */
-    -webkit-font-smoothing:antialiased;
-  }
-  .country-list.hidden{ opacity:0; transform:translateY(-8px); pointer-events:none; }
-
-  /* removed glossy mirrored highlight — only blur now */
-
-  .country-item{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:8px 10px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:0.95rem;
-    color:#ffffff; /* white text */
-    background:transparent;
-  }
-  .country-item:hover, .country-item[aria-selected="true"]{
-    background:rgba(255,255,255,0.03);
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.01);
-  }
-
-  /* hide filtered items when JS adds .hidden */
-  .country-item.hidden { display: none !important; }
-  
-  .country-search{
-    display:block;
-    width:100%;
-    box-sizing:border-box;
-    margin:6px 0 8px 0;
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,0.06);
-    background:rgba(255,255,255,0.04);
-    color:#0b1220; /* dark input text for contrast */
-  }
-
-   /* dark variant: preserve stronger blur, slightly darker tint */
-   body.dark .country-list{
-    background: rgba(0,0,0,0.72);
-    border:1px solid rgba(255,255,255,0.04);
-    box-shadow: 0 16px 36px rgba(2,6,23,0.78);
-   }
-   body.dark .country-item:hover{ background:rgba(255,255,255,0.02); }
-
-  /* ensure native select stays hidden for progressive enhancement */
-  .native-country-select{ position:absolute !important; left:-9999px !important; opacity:0 !important; width:1px !important; height:1px !important; pointer-events:none; }
-
-  /* FIX: username / password grid alignment so inputs line up with labels */
-  .user-row, .pass-row{
-    grid-template-columns:120px minmax(220px,1fr);
-    align-items:center;
-  }
-  @media (max-width:760px){
-    .user-row, .pass-row{ grid-template-columns:1fr !important; grid-auto-flow:row; }
-    .user-row label, .pass-row label{ margin-bottom:6px; }
-  }
+:root {
+  --bg:#070b12;
+  --panel:#0e1624;
+  --accent:#4fc3ff;
+  --accent2:#7cff9a;
+  --danger:#ff5f5f;
+  --text:#e6f0ff;
+  --muted:#9bb0cc;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font-family:"Segoe UI",system-ui,sans-serif;
+  background:radial-gradient(circle at top,#0c1422,var(--bg));
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:16px;
+}
+.system {
+  width:100%;
+  max-width:1100px;
+  background:linear-gradient(180deg,#0e1624,#0a111d);
+  border:1px solid #1c2a44;
+  border-radius:16px;
+  box-shadow:0 0 40px rgba(79,195,255,.15);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  opacity:0;
+  transition: opacity 0.6s ease;
+}
+.system.show { opacity:1; }
+h1 {
+  margin:0 0 12px;
+  font-size:1.4rem;
+  letter-spacing:1px;
+  color:var(--accent);
+  text-align:center;
+}
+.section { width:100%; margin-bottom:10px; border:1px solid #1c2a44; border-radius:12px; overflow:hidden; }
+.section-header { background:var(--panel); padding:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none; }
+.section-content { max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease; display:flex; flex-direction:column; gap:5px; padding:0 10px; }
+.section-content.open { max-height:1000px; padding:10px; }
+.status { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:10px; margin-bottom:14px; width:100%; }
+.card { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; text-align:center; }
+.card .label { font-size:.7rem; color:var(--muted); }
+.card .value { font-size:1.1rem; margin-top:2px; }
+.quests { display:flex; flex-direction:column; gap:5px; }
+.quest { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; display:flex; align-items:center; gap:10px; }
+.quest.done { opacity:.6; text-decoration: line-through; }
+.check { width:22px; height:22px; border-radius:6px; border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.25s; flex-shrink:0; }
+.check.checked { background:var(--accent); box-shadow:0 0 12px rgba(79,195,255,.9); }
+.check.checked::after { content:'✓'; color:#000; font-weight:700; animation:pop .25s ease-out; }
+@keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
+.footer { margin-top:12px; text-align:center; font-size:.7rem; color:var(--muted); width:100%; }
+.timeline { margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center; width:100%; display:flex; justify-content:space-between; }
+.timeline div { flex:1; text-align:center; }
+.todo-input { width:100%; display:flex; gap:5px; }
+.todo-input input { flex:1; padding:5px; border-radius:6px; border:1px solid #1c2a44; background:var(--panel); color:var(--text); }
+.todo-input button { padding:5px 10px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; }
+/* Password Screen */
+#passwordScreen { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; }
+#passwordScreen.fadeOut { animation:fadeOut 0.6s forwards; }
+@keyframes fadeOut { to { opacity:0; visibility:hidden; } }
+#passwordScreen input { padding:10px; border-radius:6px; border:1px solid var(--accent); background:#111; color:#fff; width:200px; text-align:center; }
+#passwordScreen button { margin-top:10px; padding:5px 10px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; }
+#passwordScreen .shake { animation:shake 0.3s; }
+@keyframes shake { 0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-10px);}40%,80%{transform:translateX(10px);} }
 </style>
 </head>
-
 <body>
 
-<button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
-
-<div class="auth-container" role="region" aria-label="Authentication container">
-
-  <div class="tabs" role="tablist">
-    <div class="tab-btn active" id="regTab" role="tab" aria-selected="true" tabindex="0">Register</div>
-    <div class="tab-btn" id="logTab" role="tab" aria-selected="false" tabindex="0">Login</div>
-  </div>
-
-  <!-- Register -->
-  <div id="registerForm" class="panel" aria-hidden="false">
-    <h2>Register</h2>
-
-    <div class="input-group input-row user-row">
-      <label>Username</label>
-      <input id="reg_username" type="text" placeholder="Username">
-    </div>
-
-    <div class="input-group input-row email-row">
-      <label>Email</label>
-      <input id="reg_email" type="email" placeholder="you@example.com">
-      <button id="sendEmail" class="otp-btn" type="button" aria-label="Send email OTP">📩</button>
-      <input id="reg_email_otp" placeholder="OTP">
-      <button id="validateEmail" class="otp-btn" type="button" aria-label="Validate email OTP">✔️</button>
-    </div>
-
-    <div class="input-group input-row phone-row">
-      <label>Phone</label>
-
-      <!-- replaced free-text country input with a full country dropdown -->
-      <div class="country-wrapper">
-        <div id="reg_country" aria-label="Country code" class="country-toggle">
-          <span>India (+91)</span>
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:20px;height:20px">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
-          </svg>
-        </div>
-
-        <div id="countryList" class="country-list hidden" role="listbox" aria-expanded="false">
-          <div class="country-search">
-            <input id="countryFilter" type="text" placeholder="Search country...">
-          </div>
-
-          <div class="country-item" role="option" aria-selected="false" data-value="+93">
-            <span>🇦🇫 Afghanistan</span>
-            <span class="text-sm">(+93)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+355">
-            <span>🇦🇱 Albania</span>
-            <span class="text-sm">(+355)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+213">
-            <span>🇩🇿 Algeria</span>
-            <span class="text-sm">(+213)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+376">
-            <span>🇦🇩 Andorra</span>
-            <span class="text-sm">(+376)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+244">
-            <span>🇦🇴 Angola</span>
-            <span class="text-sm">(+244)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-268">
-            <span>🇦🇬 Antigua and Barbuda</span>
-            <span class="text-sm">(+1-268)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+54">
-            <span>🇦🇷 Argentina</span>
-            <span class="text-sm">(+54)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+374">
-            <span>🇦🇲 Armenia</span>
-            <span class="text-sm">(+374)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+61">
-            <span>🇦🇺 Australia</span>
-            <span class="text-sm">(+61)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+43">
-            <span>🇦🇹 Austria</span>
-            <span class="text-sm">(+43)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+994">
-            <span>🇦🇿 Azerbaijan</span>
-            <span class="text-sm">(+994)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-242">
-            <span>🇧🇸 Bahamas</span>
-            <span class="text-sm">(+1-242)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+973">
-            <span>🇧🇭 Bahrain</span>
-            <span class="text-sm">(+973)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+880">
-            <span>🇧🇩 Bangladesh</span>
-            <span class="text-sm">(+880)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-246">
-            <span>🇧🇧 Barbados</span>
-            <span class="text-sm">(+1-246)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+375">
-            <span>🇧🇾 Belarus</span>
-            <span class="text-sm">(+375)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+32">
-            <span>🇧🇪 Belgium</span>
-            <span class="text-sm">(+32)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+501">
-            <span>🇧🇿 Belize</span>
-            <span class="text-sm">(+501)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+229">
-            <span>🇧🇯 Benin</span>
-            <span class="text-sm">(+229)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+975">
-            <span>🇧🇹 Bhutan</span>
-            <span class="text-sm">(+975)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+591">
-            <span>🇧🇴 Bolivia</span>
-            <span class="text-sm">(+591)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+387">
-            <span>🇧🇦 Bosnia and Herzegovina</span>
-            <span class="text-sm">(+387)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+267">
-            <span>🇧🇼 Botswana</span>
-            <span class="text-sm">(+267)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+55">
-            <span>🇧🇷 Brazil</span>
-            <span class="text-sm">(+55)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+673">
-            <span>🇧🇳 Brunei</span>
-            <span class="text-sm">(+673)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+359">
-            <span>🇧🇬 Bulgaria</span>
-            <span class="text-sm">(+359)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+226">
-            <span>🇧🇫 Burkina Faso</span>
-            <span class="text-sm">(+226)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+257">
-            <span>🇧🇮 Burundi</span>
-            <span class="text-sm">(+257)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+238">
-            <span>🇨🇻 Cabo Verde</span>
-            <span class="text-sm">(+238)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+855">
-            <span>🇰🇭 Cambodia</span>
-            <span class="text-sm">(+855)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+237">
-            <span>🇨🇦 Cameroon</span>
-            <span class="text-sm">(+237)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1">
-            <span>🇨🇦 Canada</span>
-            <span class="text-sm">(+1)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+236">
-            <span>🇨🇫 Central African Republic</span>
-            <span class="text-sm">(+236)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+235">
-            <span>🇹🇩 Chad</span>
-            <span class="text-sm">(+235)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+56">
-            <span>🇨🇱 Chile</span>
-            <span class="text-sm">(+56)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+86">
-            <span>🇨🇳 China</span>
-            <span class="text-sm">(+86)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+57">
-            <span>🇨🇴 Colombia</span>
-            <span class="text-sm">(+57)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+269">
-            <span>🇰🇲 Comoros</span>
-            <span class="text-sm">(+269)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+242">
-            <span>🇨🇬 Congo - Brazzaville</span>
-            <span class="text-sm">(+242)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+243">
-            <span>🇨🇩 Congo - Kinshasa</span>
-            <span class="text-sm">(+243)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+506">
-            <span>🇨🇷 Costa Rica</span>
-            <span class="text-sm">(+506)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+225">
-            <span>🇨🇮 Côte d’Ivoire</span>
-            <span class="text-sm">(+225)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+385">
-            <span>🇭🇷 Croatia</span>
-            <span class="text-sm">(+385)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+53">
-            <span>🇨🇺 Cuba</span>
-            <span class="text-sm">(+53)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+357">
-            <span>🇨🇾 Cyprus</span>
-            <span class="text-sm">(+357)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+420">
-            <span>🇨🇿 Czech Republic</span>
-            <span class="text-sm">(+420)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+45">
-            <span>🇩🇰 Denmark</span>
-            <span class="text-sm">(+45)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+253">
-            <span>🇩🇯 Djibouti</span>
-            <span class="text-sm">(+253)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-767">
-            <span>🇩🇲 Dominica</span>
-            <span class="text-sm">(+1-767)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-809">
-            <span>🇩🇴 Dominican Republic</span>
-            <span class="text-sm">(+1-809)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+593">
-            <span>🇪🇨 Ecuador</span>
-            <span class="text-sm">(+593)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+20">
-            <span>🇪🇬 Egypt</span>
-            <span class="text-sm">(+20)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+503">
-            <span>🇸🇻 El Salvador</span>
-            <span class="text-sm">(+503)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+240">
-            <span>🇬🇶 Equatorial Guinea</span>
-            <span class="text-sm">(+240)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+291">
-            <span>🇪🇷 Eritrea</span>
-            <span class="text-sm">(+291)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+372">
-            <span>🇪🇪 Estonia</span>
-            <span class="text-sm">(+372)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+251">
-            <span>🇪🇹 Ethiopia</span>
-            <span class="text-sm">(+251)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+679">
-            <span>🇫🇯 Fiji</span>
-            <span class="text-sm">(+679)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+358">
-            <span>🇫🇮 Finland</span>
-            <span class="text-sm">(+358)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+33">
-            <span>🇫🇷 France</span>
-            <span class="text-sm">(+33)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+241">
-            <span>🇬🇦 Gabon</span>
-            <span class="text-sm">(+241)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+220">
-            <span>🇬🇲 Gambia</span>
-            <span class="text-sm">(+220)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+995">
-            <span>🇬🇪 Georgia</span>
-            <span class="text-sm">(+995)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+49">
-            <span>🇩🇪 Germany</span>
-            <span class="text-sm">(+49)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+233">
-            <span>🇬🇭 Ghana</span>
-            <span class="text-sm">(+233)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+30">
-            <span>🇬🇷 Greece</span>
-            <span class="text-sm">(+30)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-473">
-            <span>🇬🇩 Grenada</span>
-            <span class="text-sm">(+1-473)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+502">
-            <span>🇬🇹 Guatemala</span>
-            <span class="text-sm">(+502)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+224">
-            <span>🇬🇳 Guinea</span>
-            <span class="text-sm">(+224)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+245">
-            <span>🇬🇼 Guinea-Bissau</span>
-            <span class="text-sm">(+245)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+592">
-            <span>🇬🇾 Guyana</span>
-            <span class="text-sm">(+592)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+509">
-            <span>🇭🇹 Haiti</span>
-            <span class="text-sm">(+509)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+504">
-            <span>🇭🇳 Honduras</span>
-            <span class="text-sm">(+504)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+36">
-            <span>🇭🇺 Hungary</span>
-            <span class="text-sm">(+36)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+354">
-            <span>🇮🇸 Iceland</span>
-            <span class="text-sm">(+354)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+91" selected>
-            <span>🇮🇳 India</span>
-            <span class="text-sm">(+91)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+62">
-            <span>🇮🇩 Indonesia</span>
-            <span class="text-sm">(+62)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+98">
-            <span>🇮🇷 Iran</span>
-            <span class="text-sm">(+98)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+964">
-            <span>🇮🇶 Iraq</span>
-            <span class="text-sm">(+964)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+353">
-            <span>🇮🇪 Ireland</span>
-            <span class="text-sm">(+353)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+972">
-            <span>🇮🇱 Israel</span>
-            <span class="text-sm">(+972)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+39">
-            <span>🇮🇹 Italy</span>
-            <span class="text-sm">(+39)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-876">
-            <span>🇯🇲 Jamaica</span>
-            <span class="text-sm">(+1-876)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+81">
-            <span>🇯🇵 Japan</span>
-            <span class="text-sm">(+81)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+962">
-            <span>🇯🇴 Jordan</span>
-            <span class="text-sm">(+962)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+7">
-            <span>🇰🇿 Kazakhstan</span>
-            <span class="text-sm">(+7)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+254">
-            <span>🇰🇪 Kenya</span>
-            <span class="text-sm">(+254)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+686">
-            <span>🇰🇷 Kiribati</span>
-            <span class="text-sm">(+686)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+965">
-            <span>🇰🇼 Kuwait</span>
-            <span class="text-sm">(+965)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+996">
-            <span>🇰🇬 Kyrgyzstan</span>
-            <span class="text-sm">(+996)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+856">
-            <span>🇱🇦 Laos</span>
-            <span class="text-sm">(+856)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+371">
-            <span>🇱🇻 Latvia</span>
-            <span class="text-sm">(+371)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+961">
-            <span>🇱🇧 Lebanon</span>
-            <span class="text-sm">(+961)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+266">
-            <span>🇱🇸 Lesotho</span>
-            <span class="text-sm">(+266)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+231">
-            <span>🇱🇷 Liberia</span>
-            <span class="text-sm">(+231)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+218">
-            <span>🇱🇾 Libya</span>
-            <span class="text-sm">(+218)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+423">
-            <span>🇱🇮 Liechtenstein</span>
-            <span class="text-sm">(+423)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+370">
-            <span>🇱🇹 Lithuania</span>
-            <span class="text-sm">(+370)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+352">
-            <span>🇱🇺 Luxembourg</span>
-            <span class="text-sm">(+352)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+261">
-            <span>🇲🇬 Madagascar</span>
-            <span class="text-sm">(+261)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+265">
-            <span>🇲🇼 Malawi</span>
-            <span class="text-sm">(+265)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+60">
-            <span>🇲🇾 Malaysia</span>
-            <span class="text-sm">(+60)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+960">
-            <span>🇲🇻 Maldives</span>
-            <span class="text-sm">(+960)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+223">
-            <span>🇲🇱 Mali</span>
-            <span class="text-sm">(+223)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+356">
-            <span>🇲🇹 Malta</span>
-            <span class="text-sm">(+356)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+692">
-            <span>🇲🇭 Marshall Islands</span>
-            <span class="text-sm">(+692)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+222">
-            <span>🇲🇦 Mauritania</span>
-            <span class="text-sm">(+222)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+230">
-            <span>🇲🇺 Mauritius</span>
-            <span class="text-sm">(+230)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+52">
-            <span>🇲🇽 Mexico</span>
-            <span class="text-sm">(+52)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+691">
-            <span>🇲🇰 Micronesia</span>
-            <span class="text-sm">(+691)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+373">
-            <span>🇲🇴 Moldova</span>
-            <span class="text-sm">(+373)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+377">
-            <span>🇲🇹 Monaco</span>
-            <span class="text-sm">(+377)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+976">
-            <span>🇲🇳 Mongolia</span>
-            <span class="text-sm">(+976)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+382">
-            <span>🇲🇪 Montenegro</span>
-            <span class="text-sm">(+382)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+212">
-            <span>🇲🇦 Morocco</span>
-            <span class="text-sm">(+212)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+258">
-            <span>🇲🇿 Mozambique</span>
-            <span class="text-sm">(+258)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+95">
-            <span>🇲🇲 Myanmar</span>
-            <span class="text-sm">(+95)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+264">
-            <span>🇳🇦 Namibia</span>
-            <span class="text-sm">(+264)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+674">
-            <span>🇳🇷 Nauru</span>
-            <span class="text-sm">(+674)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+977">
-            <span>🇳🇵 Nepal</span>
-            <span class="text-sm">(+977)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+31">
-            <span>🇳🇱 Netherlands</span>
-            <span class="text-sm">(+31)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+64">
-            <span>🇳🇿 New Zealand</span>
-            <span class="text-sm">(+64)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+505">
-            <span>🇳🇮 Nicaragua</span>
-            <span class="text-sm">(+505)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+227">
-            <span>🇳🇪 Niger</span>
-            <span class="text-sm">(+227)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+234">
-            <span>🇳🇬 Nigeria</span>
-            <span class="text-sm">(+234)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+850">
-            <span>🇰🇵 North Korea</span>
-            <span class="text-sm">(+850)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+47">
-            <span>🇳🇴 Norway</span>
-            <span class="text-sm">(+47)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+968">
-            <span>🇴🇲 Oman</span>
-            <span class="text-sm">(+968)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+92">
-            <span>🇵🇰 Pakistan</span>
-            <span class="text-sm">(+92)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+680">
-            <span>🇵🇼 Palau</span>
-            <span class="text-sm">(+680)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+507">
-            <span>🇵🇦 Panama</span>
-            <span class="text-sm">(+507)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+675">
-            <span>🇵🇬 Papua New Guinea</span>
-            <span class="text-sm">(+675)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+595">
-            <span>🇵🇾 Paraguay</span>
-            <span class="text-sm">(+595)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+51">
-            <span>🇵🇪 Peru</span>
-            <span class="text-sm">(+51)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+63">
-            <span>🇵🇭 Philippines</span>
-            <span class="text-sm">(+63)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+48">
-            <span>🇵🇱 Poland</span>
-            <span class="text-sm">(+48)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+351">
-            <span>🇵🇹 Portugal</span>
-            <span class="text-sm">(+351)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+974">
-            <span>🇶🇦 Qatar</span>
-            <span class="text-sm">(+974)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+40">
-            <span>🇷🇴 Romania</span>
-            <span class="text-sm">(+40)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+7">
-            <span>🇷🇺 Russia</span>
-            <span class="text-sm">(+7)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+250">
-            <span>🇷🇼 Rwanda</span>
-            <span class="text-sm">(+250)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-869">
-            <span>🇰🇳 Saint Kitts and Nevis</span>
-            <span class="text-sm">(+1-869)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-758">
-            <span>🇱🇨 Saint Lucia</span>
-            <span class="text-sm">(+1-758)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-784">
-            <span>🇻🇨 Saint Vincent and the Grenadines</span>
-            <span class="text-sm">(+1-784)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+685">
-            <span>🇼🇸 Samoa</span>
-            <span class="text-sm">(+685)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+378">
-            <span>🇸🇲 San Marino</span>
-            <span class="text-sm">(+378)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+239">
-            <span>🇸🇹 Sao Tome and Principe</span>
-            <span class="text-sm">(+239)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+966">
-            <span>🇸🇦 Saudi Arabia</span>
-            <span class="text-sm">(+966)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+221">
-            <span>🇸🇳 Senegal</span>
-            <span class="text-sm">(+221)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+381">
-            <span>🇷🇸 Serbia</span>
-            <span class="text-sm">(+381)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+248">
-            <span>🇸🇨 Seychelles</span>
-            <span class="text-sm">(+248)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+232">
-            <span>🇸🇱 Sierra Leone</span>
-            <span class="text-sm">(+232)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+65">
-            <span>🇸🇬 Singapore</span>
-            <span class="text-sm">(+65)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+421">
-            <span>🇸🇰 Slovakia</span>
-            <span class="text-sm">(+421)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+386">
-            <span>🇸🇮 Slovenia</span>
-            <span class="text-sm">(+386)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+677">
-            <span>🇸🇧 Solomon Islands</span>
-            <span class="text-sm">(+677)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+252">
-            <span>🇸🇴 Somalia</span>
-            <span class="text-sm">(+252)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+27">
-            <span>🇿🇦 South Africa</span>
-            <span class="text-sm">(+27)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+211">
-            <span>🇸🇩 South Sudan</span>
-            <span class="text-sm">(+211)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+34">
-            <span>🇪🇸 Spain</span>
-            <span class="text-sm">(+34)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+94">
-            <span>🇱🇰 Sri Lanka</span>
-            <span class="text-sm">(+94)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+249">
-            <span>🇸🇩 Sudan</span>
-            <span class="text-sm">(+249)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+597">
-            <span>🇸🇷 Suriname</span>
-            <span class="text-sm">(+597)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+46">
-            <span>🇸🇪 Sweden</span>
-            <span class="text-sm">(+46)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+41">
-            <span>🇨🇭 Switzerland</span>
-            <span class="text-sm">(+41)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+963">
-            <span>🇸🇾 Syria</span>
-            <span class="text-sm">(+963)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+886">
-            <span>🇹🇼 Taiwan</span>
-            <span class="text-sm">(+886)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+992">
-            <span>🇹🇯 Tajikistan</span>
-            <span class="text-sm">(+992)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+255">
-            <span>🇹🇿 Tanzania</span>
-            <span class="text-sm">(+255)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+66">
-            <span>🇹🇭 Thailand</span>
-            <span class="text-sm">(+66)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+670">
-            <span>🇹🇱 Timor-Leste</span>
-            <span class="text-sm">(+670)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+228">
-            <span>🇹🇬 Togo</span>
-            <span class="text-sm">(+228)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+676">
-            <span>🇹🇴 Tonga</span>
-            <span class="text-sm">(+676)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1-868">
-            <span>🇹🇹 Trinidad and Tobago</span>
-            <span class="text-sm">(+1-868)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+216">
-            <span>🇹🇳 Tunisia</span>
-            <span class="text-sm">(+216)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+90">
-            <span>🇹🇷 Turkey</span>
-            <span class="text-sm">(+90)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+993">
-            <span>🇹🇲 Turkmenistan</span>
-            <span class="text-sm">(+993)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+688">
-            <span>🇹🇻 Tuvalu</span>
-            <span class="text-sm">(+688)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+256">
-            <span>🇺🇬 Uganda</span>
-            <span class="text-sm">(+256)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+380">
-            <span>🇺🇦 Ukraine</span>
-            <span class="text-sm">(+380)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+971">
-            <span>🇦🇪 United Arab Emirates</span>
-            <span class="text-sm">(+971)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+44">
-            <span>🇬🇧 United Kingdom</span>
-            <span class="text-sm">(+44)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+1">
-            <span>🇺🇸 United States</span>
-            <span class="text-sm">(+1)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+598">
-            <span>🇺🇾 Uruguay</span>
-            <span class="text-sm">(+598)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+998">
-            <span>🇺🇿 Uzbekistan</span>
-            <span class="text-sm">(+998)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+678">
-            <span>🇻🇺 Vanuatu</span>
-            <span class="text-sm">(+678)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+379">
-            <span>🇻🇦 Vatican City</span>
-            <span class="text-sm">(+379)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+58">
-            <span>🇻🇪 Venezuela</span>
-            <span class="text-sm">(+58)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+84">
-            <span>🇻🇳 Vietnam</span>
-            <span class="text-sm">(+84)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+967">
-            <span>🇾🇪 Yemen</span>
-            <span class="text-sm">(+967)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+260">
-            <span>🇿🇲 Zambia</span>
-            <span class="text-sm">(+260)</span>
-          </div>
-          <div class="country-item" role="option" aria-selected="false" data-value="+263">
-            <span>🇿🇦 Zimbabwe</span>
-            <span class="text-sm">(+263)</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- keep selected country code separately — do NOT place it into the phone input -->
-      <input type="hidden" id="reg_country_code" value="+91">
-
-      <input id="reg_phone" type="tel" placeholder="Country Code + Phone Number">
-      <button id="sendPhone" class="otp-btn" type="button" aria-label="Send phone OTP">📩</button>
-      <input id="reg_phone_otp" placeholder="OTP">
-      <button id="validatePhone" class="otp-btn" type="button" aria-label="Validate phone OTP">✔️</button>
-    </div>
-
-    <div class="input-group input-row pass-row">
-      <label>Password</label>
-      <input id="reg_password" type="password" placeholder="Password">
-    </div>
-
-    <button id="registerBtn" class="submit-btn" type="button">Register</button>
-  </div>
-
-  <!-- Login -->
-  <div id="loginForm" class="panel hidden" aria-hidden="true">
-    <h2>Login</h2>
-
-    <div class="input-group">
-      <label>Username</label>
-      <input id="login_username" type="text" placeholder="Username">
-    </div>
-
-    <div class="input-group">
-      <label>Password</label>
-      <input id="login_password" type="password" placeholder="Password">
-    </div>
-
-    <button id="loginBtn" class="submit-btn" type="button">Login</button>
-  </div>
-
+<div id="passwordScreen">
+  <input type="password" id="passwordInput" placeholder="Enter Password">
+  <button id="passwordBtn">Enter</button>
 </div>
 
-<script>
-/* Tab switching with smooth panel transitions and aria updates */
-const regTab = document.getElementById('regTab');
-const logTab = document.getElementById('logTab');
-const regForm = document.getElementById('registerForm');
-const logForm = document.getElementById('loginForm');
+<div id="mainSystem" class="system">
+  <h1>SYSTEM – DAILY QUEST</h1>
+  <h1>E-RANK</h1>
+  <div class="status">
+    <div class="card"><div class="label">LEVEL</div><div id="level" class="value">1</div></div>
+    <div class="card"><div class="label">RANK</div><div id="rank" class="value">E</div></div>
+    <div class="card"><div class="label">EXP</div><div id="exp" class="value">0 / 100</div></div>
+    <div class="card"><div class="label">STRENGTH</div><div id="str" class="value">0</div></div>
+    <div class="card"><div class="label">ENDURANCE</div><div id="end" class="value">0</div></div>
+  </div>
 
-function showRegister(){
-  regTab.classList.add('active');
-  logTab.classList.remove('active');
-  // show register panel
-  regForm.classList.remove('hidden');
-  regForm.setAttribute('aria-hidden','false');
-  // hide login panel
-  logForm.classList.add('hidden');
-  logForm.setAttribute('aria-hidden','true');
-  regTab.setAttribute('aria-selected','true');
-  logTab.setAttribute('aria-selected','false');
-}
-function showLogin(){
-  logTab.classList.add('active');
-  regTab.classList.remove('active');
-  logForm.classList.remove('hidden');
-  logForm.setAttribute('aria-hidden','false');
-  regForm.classList.add('hidden');
-  regForm.setAttribute('aria-hidden','true');
-  logTab.setAttribute('aria-selected','true');
-  regTab.setAttribute('aria-selected','false');
-}
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('workoutsContent')">Workout <span>&#9660;</span></div>
+    <div class="section-content" id="workoutsContent"></div>
+  </div>
 
-regTab.onclick = showRegister;
-logTab.onclick = showLogin;
-regTab.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); showRegister(); } };
-logTab.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); showLogin(); } };
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('todoContent')">To Do <span>&#9660;</span></div>
+    <div class="section-content" id="todoContent">
+      <div class="todo-input">
+        <input type="text" id="newTask" placeholder="Add new task">
+        <button id="addTaskBtn">Add</button>
+      </div>
+      <div id="todoList" class="quests"></div>
+    </div>
+  </div>
 
-/* Theme toggle */
-const themeToggle = document.getElementById('themeToggle');
-function applyTheme(t){
-  if(t==='dark') document.body.classList.add('dark'); 
-  else document.body.classList.remove('dark');
-  themeToggle.textContent = t==='dark' ? '🌙' : '☀️';
-  localStorage.setItem('auth_theme',t);
-}
-applyTheme(localStorage.getItem('auth_theme') || 'light');
+  <div class="footer">Resets automatically at 00:00</div>
+  <div class="timeline">
+    <div id="currentStreak">Current Streak Days: 0</div>
+    <div id="missedStreak">Missed Days: 0</div>
+  </div>
+</div>
 
-themeToggle.onclick = ()=>{ 
-  const cur = document.body.classList.contains('dark') ? 'dark' : 'light';
-  applyTheme(cur==='dark'?'light':'dark');
-};
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-/* OTP Demo */
-function genOTP(){ return Math.floor(100000 + Math.random()*900000); }
+const firebaseConfig = { projectId: "solo-leveling-36aca", databaseURL: "https://solo-leveling-36aca-default-rtdb.firebaseio.com" };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const userId = 'defaultUser';
 
-let emailOTP = null, phoneOTP = null;
+let level=1, exp=0, expNeeded=100, str=0, end=0, completed=[], streakDays=0, missedDays=0;
+const baseQuests=[['Push-ups',25,'reps'],['Sit-ups',100,'reps'],['Squats',100,'reps'],['Dips',100,'reps'],['Inverted Rows',100,'reps'],['Russian Twist',100,'reps'],['Lunges',100,'reps'],['Arm Presser (Each Side)',100,'reps'],['Plank',3,'mins'],['Left Side Plank',3,'mins'],['Right Side Plank',3,'mins'],['Swimming',60,'mins'],['Cycling / Walking',10,'kms']];
 
-sendEmail.onclick = ()=>{
-  if(!reg_email.value.trim()) return alert("Enter email");
-  emailOTP = genOTP();
-  alert("Demo Email OTP: " + emailOTP);
-};
+function getMultiplier(){ return 1+(level-1)*0.05; }
+function getRank(totalExp){ if(totalExp<10000) return 'E'; if(totalExp<20000) return 'D'; if(totalExp<30000) return 'C'; if(totalExp<40000) return 'B'; if(totalExp<50000) return 'A'; if(totalExp<60000) return 'S'; if(totalExp<70000) return 'SS'; if(totalExp<80000) return 'SSS'; if(totalExp<90000) return 'SSS+'; return '∞'; }
 
-validateEmail.onclick = ()=>{
-  if(reg_email_otp.value == emailOTP) alert("Email Verified");
-  else alert("Invalid OTP");
-};
+window.toggleSection = function(id){ const el = document.getElementById(id); el.classList.toggle('open'); }
 
-sendPhone.onclick = ()=>{
-  if(!reg_phone.value.trim()) return alert("Enter phone");
-  phoneOTP = genOTP();
-  alert("Demo Phone OTP: " + phoneOTP);
-};
+async function loadData(){ try { const snapshot = await get(ref(db, 'users/' + userId)); const data = snapshot.val(); if(data){ level=data.level||1; exp=data.exp||0; expNeeded=data.expNeeded||100; str=data.str||0; end=data.end||0; completed=data.completed||[]; streakDays=data.streakDays||0; missedDays=data.missedDays||0; } buildQuests(); updateUI(); updateTimeline(); } catch(e){ console.error(e); } }
+function saveData(){ set(ref(db,'users/'+userId), {level,exp,expNeeded,str,end,completed,streakDays,missedDays}); }
 
-validatePhone.onclick = ()=>{ 
-  if(reg_phone_otp.value == phoneOTP) alert("Phone Verified");
-  else alert("Invalid OTP");
-};
+function buildQuests(){ const wrap=document.getElementById('workoutsContent'); wrap.innerHTML=''; const m=getMultiplier(); baseQuests.forEach(([name,val,type])=>{ let displayVal = Math.round(val*m); const q=document.createElement('div'); q.className='quest'+(completed.includes(name)?' done':''); q.dataset.name=name; q.innerHTML=`<div class="check ${completed.includes(name)?'checked':''}" onclick="toggleQuest(this)"></div><span>${name} – ${displayVal} ${type}</span>`; wrap.appendChild(q); }); }
+window.toggleQuest = function(box){ const quest = box.parentElement; const name = quest.dataset.name; if(completed.includes(name)) return; completed.push(name); str+=1; end+=1; exp+=10; if(exp>=expNeeded){ level+=1; exp=0; expNeeded=Math.floor(expNeeded*1.3); } saveData(); buildQuests(); updateUI(); updateTimeline(); }
 
-/* Demo login/register */
-registerBtn.onclick = ()=>{
-  if(!reg_username.value || !reg_password.value) return alert("Fill details");
-  alert("Registration success (demo)");
-};
-loginBtn.onclick = ()=>{
-  if(!login_username.value || !login_password.value) return alert("Fill details");
-  alert("Login success (demo)");
-};
+function updateUI(){ document.getElementById('level').textContent=level; document.getElementById('rank').textContent=getRank(level*10); document.getElementById('exp').textContent=`${exp} / ${expNeeded}`; document.getElementById('str').textContent=str; document.getElementById('end').textContent=end; }
+function updateTimeline(){ document.getElementById('currentStreak').textContent=`Current Streak Days: ${streakDays}`; document.getElementById('missedStreak').textContent=`Missed Days: ${missedDays}`; }
 
-// Country select logic
-const countryToggle = document.getElementById('reg_country');
-const countryList = document.getElementById('countryList');
-const countryFilter = document.getElementById('countryFilter');
+// To-Do functionality
+function addTodo(){ const input=document.getElementById('newTask'); const val=input.value.trim(); if(!val) return; const todoList=document.getElementById('todoList'); const div=document.createElement('div'); div.className='quest'; div.innerHTML=`<div class='check' onclick='this.classList.toggle("checked")'></div><span>${val}</span>`; todoList.appendChild(div); input.value=''; }
+document.getElementById('newTask').addEventListener('keydown', e=>{ if(e.key==='Enter') addTodo(); });
+document.getElementById('addTaskBtn').addEventListener('click', addTodo);
 
-countryToggle.onclick = ()=>{
-  const isOpen = countryList.classList.contains('hidden');
-  countryList.classList.toggle('hidden',!isOpen);
-  countryList.setAttribute('aria-expanded',String(isOpen));
-  if(isOpen) countryFilter.focus();
-};
+// Password functionality
+const passwordScreen=document.getElementById('passwordScreen');
+const passwordInput=document.getElementById('passwordInput');
+const passwordBtn=document.getElementById('passwordBtn');
+function enterPassword(){ if(passwordInput.value==='K@ilesh13'){ passwordScreen.classList.add('fadeOut'); setTimeout(()=>{ document.getElementById('mainSystem').classList.add('show'); },600); } else { passwordInput.classList.add('shake'); setTimeout(()=>{ passwordInput.classList.remove('shake'); },300); passwordInput.value=''; } }
+passwordBtn.addEventListener('click', enterPassword);
+passwordInput.addEventListener('keyup', e=>{ if(e.key==='Enter') enterPassword(); });
 
-// Close country list on outside click
-document.addEventListener('click', (e)=>{
-  if(!countryToggle.contains(e.target) && !countryList.contains(e.target)){
-    countryList.classList.add('hidden');
-    countryList.setAttribute('aria-expanded','false');
-  }
-});
-
-// ensure filter works + initialize selected country into phone input
-(function countryInit(){
-    if(!countryList) return;
-    // ensure any pre-marked selected item is applied to toggle and phone
-    const pre = countryList.querySelector('.country-item[selected], .country-item[aria-selected="true"]');
-    if(pre){
-      try{
-      // show name only in toggle and store code in hidden field (do NOT put code into visible phone input)
-      countryToggle.querySelector('span').innerText = (pre.querySelector('span')?.innerText || pre.innerText).trim();
-      document.getElementById('reg_country_code').value = pre.getAttribute('data-value') || '';
-      }catch(e){}
-    }
- 
-    // keep existing filter logic (it now hides via .country-item.hidden)
-    countryFilter.oninput = ()=>{
-      const filter = (countryFilter.value || '').toLowerCase().trim();
-      const items = countryList.querySelectorAll('.country-item');
-      items.forEach(item=>{
-        const text = (item.innerText || '').toLowerCase();
-        item.classList.toggle('hidden', !text.includes(filter));
-      });
-    };
-  })();
- 
- // try to auto-detect user country via IP (no prompt). uses ipapi.co — falls back silently on error.
- async function detectCountryByIP(){
-   if(!countryList) return;
-   try{
-     const res = await fetch('https://ipapi.co/json/');
-     if(!res.ok) return;
-     const data = await res.json();
-     const name = (data.country_name || data.country || '').toLowerCase();
-     const calling = (data.country_calling_code || '').replace(/\s|‑/g,''); // e.g. "+1"
-
-     // match by visible country name first
-     const nodes = Array.from(countryList.querySelectorAll('.country-item'));
-     let match = nodes.find(n => {
-       const nName = (n.querySelector('span')?.innerText || '').toLowerCase();
-       return name && nName.includes(name);
-     });
-
-     // otherwise match by calling code
-     if(!match && calling){
-       match = nodes.find(n=>{
-         const v = (n.getAttribute('data-value')||'').replace(/-+/g,'');
-         // normalize to forms like "+1" or "+91"
-         const normalized = v;
-         return normalized === calling || normalized.startsWith(calling) || calling.startsWith(normalized);
-       });
-     }
-
-     if(match){
-       const value = match.getAttribute('data-value') || '';
-       countryToggle.querySelector('span').innerText = (match.querySelector('span')?.innerText || match.innerText).trim();
-       document.getElementById('reg_country_code').value = value;
-     }
-   }catch(e){
-     /* ignore network errors or CORS failures — detection is optional */
-   }
- }
- // run detection after init
- detectCountryByIP();
-   
-// Select country item
-countryList.onclick = (e)=>{
-  const item = e.target.closest('.country-item');
-  if(!item) return;
-  const value = item.getAttribute('data-value');
-  const text = item.innerText.trim();
-  countryToggle.querySelector('span').innerText = text;
-  // store selected country code separately; DO NOT inject into the visible phone input
-  document.getElementById('reg_country_code').value = value || '';
-  countryList.classList.add('hidden');
-  countryList.setAttribute('aria-expanded','false');
-};
+loadData();
 </script>
-
-</body>
-</html>
+</bo
