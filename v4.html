@@ -15,17 +15,33 @@
   --muted:#9bb0cc;
 }
 * { box-sizing:border-box; }
-body {
-  margin:0;
+body, html {
+  margin:0; height:100%; width:100%;
   font-family:"Segoe UI",system-ui,sans-serif;
-  background:radial-gradient(circle at top,#0c1422,var(--bg));
+  background:#000;
   color:var(--text);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:16px;
+  display:flex; justify-content:center; align-items:center;
+  overflow:hidden;
 }
+.hidden { display:none; }
+
+#passwordScreen {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:#000; display:flex; justify-content:center; align-items:center;
+  flex-direction:column; animation:fadeIn 1s ease;
+}
+#passwordScreen input {
+  padding:10px; border-radius:6px; border:none; background:#111; color:var(--accent); width:250px; font-size:1rem;
+  text-align:center; margin-bottom:10px;
+}
+#passwordScreen button {
+  padding:8px 16px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer;
+  font-weight:700;
+}
+#passError { color:var(--danger); margin-top:5px; font-weight:700; }
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
 .system {
   width:100%;
   max-width:1100px;
@@ -40,11 +56,15 @@ body {
 }
 h1 {
   margin:0 0 12px;
-  font-size:1.4rem;
+  font-size:1.6rem;
   letter-spacing:1px;
   color:var(--accent);
   text-align:center;
+  text-shadow:0 0 10px #4fc3ff;
+  animation:glow 2s infinite alternate;
 }
+@keyframes glow { from{text-shadow:0 0 10px #4fc3ff;} to{text-shadow:0 0 30px #7cff9a;} }
+
 .section {
   width:100%;
   margin-bottom:10px;
@@ -64,13 +84,14 @@ h1 {
 .section-content {
   max-height:0;
   overflow:hidden;
-  transition:max-height 0.3s ease;
+  transition:max-height 0.3s ease, padding 0.3s ease;
   display:flex;
   flex-direction:column;
   gap:5px;
   padding:0 10px;
 }
 .section-content.open { max-height:1000px; padding:10px; }
+
 .status { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:10px; margin-bottom:14px; width:100%; }
 .card { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; text-align:center; }
 .card .label { font-size:.7rem; color:var(--muted); }
@@ -82,16 +103,25 @@ h1 {
 .check.checked { background:var(--accent); box-shadow:0 0 12px rgba(79,195,255,.9); }
 .check.checked::after { content:'✓'; color:#000; font-weight:700; animation:pop .25s ease-out; }
 @keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
+
 .footer { margin-top:12px; text-align:center; font-size:.7rem; color:var(--muted); width:100%; }
 .timeline { margin-top:16px; font-size:.8rem; color:var(--muted); text-align:center; width:100%; display:flex; justify-content:space-between; }
 .timeline div { flex:1; text-align:center; }
-.todo-input { width:100%; display:flex; gap:5px; margin-bottom:5px; }
+.todo-input { width:100%; display:flex; gap:5px; }
 .todo-input input { flex:1; padding:5px; border-radius:6px; border:1px solid #1c2a44; background:var(--panel); color:var(--text); }
-.todo-input button { padding:5px 10px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; }
+.todo-input button { padding:5px 10px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; font-weight:700; }
 </style>
 </head>
 <body>
-<div class="system">
+<!-- Password Screen -->
+<div id="passwordScreen">
+  <input type="password" id="passInput" placeholder="Enter Password" />
+  <button id="passBtn">Enter</button>
+  <div id="passError"></div>
+</div>
+
+<!-- Main System -->
+<div class="system hidden" id="mainSystem">
   <h1>SYSTEM – DAILY QUEST (E-RANK)</h1>
   <div class="status">
     <div class="card"><div class="label">LEVEL</div><div id="level" class="value">1</div></div>
@@ -111,7 +141,7 @@ h1 {
     <div class="section-content" id="todoContent">
       <div class="todo-input">
         <input type="text" id="newTask" placeholder="Add new task and press Enter">
-        <button id="addTaskBtn">Add</button>
+        <button onclick="addTodo()">Add</button>
       </div>
       <div id="todoList" class="quests"></div>
     </div>
@@ -128,15 +158,7 @@ h1 {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// --- PASSWORD PROTECTION ---
-const password = prompt("Enter password to access:");
-if(password !== "K@ilesh13"){
-    alert("Unauthorized access! You cannot view this page.");
-    document.body.innerHTML = "<h2 style='color:red; text-align:center; margin-top:50px;'>Unauthorized Access</h2>";
-    throw new Error("Unauthorized access");
-}
-
-// --- FIREBASE ---
+// --- Firebase ---
 const firebaseConfig = {
   projectId: "solo-leveling-36aca",
   databaseURL: "https://solo-leveling-36aca-default-rtdb.firebaseio.com"
@@ -145,7 +167,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const userId = 'defaultUser';
 
-// --- SYSTEM DATA ---
+// --- Data ---
 let level=1, exp=0, expNeeded=100, str=0, end=0, completed=[], streakDays=0, missedDays=0;
 const baseQuests=[
   ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'], ['Dips',100,'reps'], ['Inverted Rows',100,'reps'],
@@ -153,7 +175,27 @@ const baseQuests=[
   ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'], ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
 ];
 
-// --- UI HELPERS ---
+// --- Password ---
+const passwordScreen = document.getElementById('passwordScreen');
+const mainSystem = document.getElementById('mainSystem');
+const passInput = document.getElementById('passInput');
+const passBtn = document.getElementById('passBtn');
+const passError = document.getElementById('passError');
+
+function showSystem(){ passwordScreen.classList.add('hidden'); mainSystem.classList.remove('hidden'); }
+
+function checkPassword(){
+  if(passInput.value === 'K@ilesh13') showSystem();
+  else { passError.textContent = "Unauthorized access!"; passInput.value=''; passInput.focus(); }
+}
+
+window.addEventListener('load',()=>passInput.focus());
+passBtn.addEventListener('click', checkPassword);
+passInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ e.preventDefault(); checkPassword(); }
+});
+
+// --- UI Functions ---
 function getMultiplier(){ return 1+(level-1)*0.05; }
 function getRank(totalExp){
   if(totalExp<10000) return 'E'; if(totalExp<20000) return 'D'; if(totalExp<30000) return 'C';
@@ -163,99 +205,75 @@ function getRank(totalExp){
 }
 
 window.toggleSection = function(id){
-  const el = document.getElementById(id);
-  if(el.classList.contains('open')){
-    el.classList.remove('open');
-  } else {
-    el.classList.add('open');
-  }
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
 }
 
-// --- LOAD FIREBASE DATA ---
 async function loadData(){
-  try {
-    const snapshot = await get(ref(db, 'users/' + userId));
+  try{
+    const snapshot = await get(ref(db,'users/'+userId));
     const data = snapshot.val();
     if(data){
-      level = data.level || 1;
-      exp = data.exp || 0;
-      expNeeded = data.expNeeded || 100;
-      str = data.str || 0;
-      end = data.end || 0;
-      completed = data.completed || [];
-      streakDays = data.streakDays || 0;
-      missedDays = data.missedDays || 0;
+      level=data.level||1; exp=data.exp||0; expNeeded=data.expNeeded||100;
+      str=data.str||0; end=data.end||0; completed=data.completed||[];
+      streakDays=data.streakDays||0; missedDays=data.missedDays||0;
     }
-    buildQuests();
-    updateUI();
-    updateTimeline();
-  } catch(e){ console.error('Firebase Load Error:', e); }
+    buildQuests(); updateUI(); updateTimeline();
+  }catch(e){ console.error('Firebase Load Error:', e); }
 }
 
 function saveData(){
-  set(ref(db, 'users/' + userId), {level, exp, expNeeded, str, end, completed, streakDays, missedDays});
+  set(ref(db,'users/'+userId), {level, exp, expNeeded, str, end, completed, streakDays, missedDays});
 }
 
-// --- WORKOUTS ---
 function buildQuests(){
   const wrap = document.getElementById('workoutsContent');
-  wrap.innerHTML = '';
-  const m = getMultiplier();
+  wrap.innerHTML='';
+  const m=getMultiplier();
   baseQuests.forEach(([name,val,type])=>{
     let displayVal = Math.round(val*m);
-    const q = document.createElement('div');
-    q.className = 'quest' + (completed.includes(name)?' done':'');
-    q.dataset.name = name;
-    q.innerHTML = `<div class="check ${completed.includes(name)?'checked':''}" onclick="toggleQuest(this)"></div><span>${name} – ${displayVal} ${type}</span>`;
+    const q=document.createElement('div');
+    q.className='quest'+(completed.includes(name)?' done':'');
+    q.dataset.name=name;
+    q.innerHTML=`<div class="check ${completed.includes(name)?'checked':''}" onclick="toggleQuest(this)"></div><span>${name} – ${displayVal} ${type}</span>`;
     wrap.appendChild(q);
   });
 }
 
-window.toggleQuest = function(box){
-  const quest = box.parentElement;
-  const name = quest.dataset.name;
+window.toggleQuest=function(box){
+  const quest=box.parentElement; const name=quest.dataset.name;
   if(completed.includes(name)) return;
   completed.push(name);
-  str+=1; end+=1;
-  exp+=10;
+  str+=1; end+=1; exp+=10;
   if(exp>=expNeeded){ level+=1; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
-  saveData();
-  buildQuests();
-  updateUI();
-  updateTimeline();
+  saveData(); buildQuests(); updateUI(); updateTimeline();
 }
 
-// --- UI UPDATE ---
 function updateUI(){
-  document.getElementById('level').textContent = level;
-  document.getElementById('rank').textContent = getRank(level*10);
-  document.getElementById('exp').textContent = `${exp} / ${expNeeded}`;
-  document.getElementById('str').textContent = str;
-  document.getElementById('end').textContent = end;
+  document.getElementById('level').textContent=level;
+  document.getElementById('rank').textContent=getRank(level*10);
+  document.getElementById('exp').textContent=`${exp} / ${expNeeded}`;
+  document.getElementById('str').textContent=str;
+  document.getElementById('end').textContent=end;
 }
 
 function updateTimeline(){
-  document.getElementById('currentStreak').textContent = `Current Streak Days: ${streakDays}`;
-  document.getElementById('missedStreak').textContent = `Missed Days: ${missedDays}`;
+  document.getElementById('currentStreak').textContent=`Current Streak Days: ${streakDays}`;
+  document.getElementById('missedStreak').textContent=`Missed Days: ${missedDays}`;
 }
 
-// --- TO DO ---
+// --- To-Do ---
 function addTodo(){
-  const input = document.getElementById('newTask');
-  const val = input.value.trim();
+  const input=document.getElementById('newTask'); const val=input.value.trim();
   if(!val) return;
-  const todoList = document.getElementById('todoList');
-  const div = document.createElement('div');
-  div.className = 'quest';
-  div.innerHTML = `<div class='check' onclick='this.classList.toggle("checked")'></div><span>${val}</span>`;
-  todoList.appendChild(div);
-  input.value='';
+  const todoList=document.getElementById('todoList');
+  const div=document.createElement('div');
+  div.className='quest';
+  div.innerHTML=`<div class='check' onclick='this.classList.toggle("checked")'></div><span>${val}</span>`;
+  todoList.appendChild(div); input.value=''; input.focus();
 }
-
-document.getElementById('addTaskBtn').addEventListener('click', addTodo);
 document.getElementById('newTask').addEventListener('keydown', e=>{ if(e.key==='Enter') addTodo(); });
 
-// --- INITIALIZE ---
 loadData();
 </script>
 </body>
