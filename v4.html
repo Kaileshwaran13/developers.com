@@ -226,12 +226,22 @@ function toggleSection(id){
 
 let todoTasks=[];
 function buildTodo(){
-  const todoList=document.getElementById('todoList'); todoList.innerHTML='';
+  const todoList=document.getElementById('todoList'); 
+  todoList.innerHTML='';
   todoTasks.forEach(task=>{
-    const div=document.createElement('div'); div.className='quest';
+    const div=document.createElement('div'); 
+    div.className='quest';
     div.innerHTML=`<div class='check ${task.done?'checked':''}' onclick='taskToggle(this,"${task.text}")'></div><span>${task.text}</span>`;
     todoList.appendChild(div);
   });
+
+  // Auto-expand To-Do section after adding tasks
+  const section = document.getElementById('todoContent');
+  if(!section.classList.contains('open')){
+    section.classList.add('open');
+  }
+  // Update max-height for smooth animation
+  section.style.maxHeight = section.scrollHeight + "px";
 }
 
 function taskToggle(el,text){
