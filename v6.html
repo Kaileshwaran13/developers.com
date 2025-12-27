@@ -338,11 +338,13 @@ h1 {
   cursor:pointer;
   font-weight:bold;
   transition:all 0.2s;
-  box-shadow:0 0 15px rgba(79,195,255,.3);\n}
+  box-shadow:0 0 15px rgba(79,195,255,.3);
+}
 
 .todo-input button:hover {
   box-shadow:0 0 25px rgba(79,195,255,.6), inset 0 0 10px rgba(79,195,255,.2);
-  transform:translateY(-2px);\n}
+  transform:translateY(-2px);
+}
 
 /* Password overlay */
 #passwordOverlay {
@@ -1240,10 +1242,6 @@ async function loadData(){
   document.getElementById('expDisplay').textContent=`${exp}/${expNeeded}`;
   document.getElementById('strDisplay').textContent=str;
   document.getElementById('endDisplay').textContent=end;
-  checkDailyReset();
-  const rank=getRank(level*10);
-  document.getElementById('rankDisplay').textContent=rank;
-  document.getElementById('levelDisplay').textContent=level;
   buildQuests(); buildTodo(); updateUI(); updateDailyMotivation(); updateRankTimeline(); updateWeeklyChallenge(); updateStatusPanel(); updateDifficultyMeter(); checkAchievements(); updateTimeline();
 }
 
