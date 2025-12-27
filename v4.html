@@ -501,7 +501,18 @@ function buildQuests(){
   wrap.innerHTML='';
   const m=getMultiplier();
   baseQuests.forEach(([name,val,type])=>{
-    const display=name==='Swimming'?val:Math.round(val*m);
+    let display=name==='Swimming'?val:Math.round(val*m);
+    
+    let displayText;
+    if(type==='mins'){
+      const totalSeconds=Math.round(display*60);
+      const mins=Math.floor(totalSeconds/60);
+      const secs=totalSeconds%60;
+      displayText=`${mins}m ${secs}s`;
+    }else{
+      displayText=`${display} ${type}`;
+    }
+    
     const q=document.createElement('div');
     const isX2=x2Completed.includes(name);
     const isDone=completed.includes(name);
@@ -510,7 +521,7 @@ function buildQuests(){
     q.innerHTML=
       `<div class="check ${isDone?'checked':''}"
         onclick="toggleQuest(this)"></div>
-       <span>${name} – ${display} ${type}</span>
+       <span>${name} – ${displayText}</span>
        <button class="multiplier-btn" onclick="toggleQuestX2(event)">×2</button>`;
     wrap.appendChild(q);
   });
@@ -519,7 +530,8 @@ function buildQuests(){
 window.toggleQuest=function(box){
   const quest=box.parentElement;
   const name=quest.dataset.name;
-  if(completed.includes(name)) return;
+  if(completed.includes(name) && !x2Completed.includes(name)) return;
+  if(x2Completed.includes(name)) return;
   completed.push(name);
   if(name!=='Swimming'){ str++; end++; exp+=10; }
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
@@ -531,10 +543,19 @@ window.toggleQuestX2=function(e){
   e.stopPropagation();
   const quest=e.target.parentElement;
   const name=quest.dataset.name;
-  if(completed.includes(name)) return;
-  completed.push(name);
+  
+  if(x2Completed.includes(name)) return;
+  
+  const wasNormalCompleted=completed.includes(name) && !x2Completed.includes(name);
+  
+  if(wasNormalCompleted){
+    if(name!=='Swimming'){ str+=1; end+=1; exp+=10; }
+  }else{
+    completed.push(name);
+  }
+  
   x2Completed.push(name);
-  if(name!=='Swimming'){ str+=2; end+=2; exp+=20; }
+  
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
   saveData(); buildQuests(); updateUI(); updateTimeline();
 };
