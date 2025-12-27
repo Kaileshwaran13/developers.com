@@ -146,6 +146,15 @@ h1 {
   box-shadow:0 0 12px rgba(79,195,255,.2);
 }
 .quest.done span { opacity:0.6; }
+.quest.x2done { 
+  background:rgba(255,95,95,.25);
+  border-color:var(--danger);
+  box-shadow:0 0 16px rgba(255,95,95,.6);
+}
+.quest.x2done .check.checked {
+  background:var(--danger);
+  box-shadow:0 0 14px rgba(255,95,95,.8);
+}
 .quest.dragging { 
   opacity:0.5; 
   transform:scale(0.98);
@@ -202,6 +211,27 @@ h1 {
   cursor:pointer;
   color:var(--danger);
   font-weight:bold;
+}
+
+.multiplier-btn {
+  margin-left:auto;
+  cursor:pointer;
+  color:var(--danger);
+  font-weight:bold;
+  background:rgba(255,95,95,.2);
+  border:1px solid var(--danger);
+  padding:4px 8px;
+  border-radius:6px;
+  transition:all 0.2s;
+}
+
+.multiplier-btn:hover {
+  background:rgba(255,95,95,.4);
+  box-shadow:0 0 12px rgba(255,95,95,.6);
+}
+
+.multiplier-btn:active {
+  transform:scale(0.95);
 }
 
 /* ✅ NEON GREEN DROP LINE (ADDED) */
@@ -399,7 +429,7 @@ input.addEventListener('keydown', e=>{
 
 function initSystem(){
 let level=1, exp=0, expNeeded=100, str=0, end=0,
-    completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1;
+    completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[];
 
 const baseQuests=[
   ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
@@ -434,6 +464,7 @@ function checkDailyReset(){
   if(lastResetDate!==today){
     lastResetDate=today;
     completed=[];
+    x2Completed=[];
     todoTasks=todoTasks.filter(task=>!task.done);
     baseMultiplier+=0.05;
     saveData();
@@ -454,7 +485,7 @@ async function loadData(){
     str=d.str||0; end=d.end||0; completed=d.completed||[];
     streakDays=d.streakDays||0; missedDays=d.missedDays||0;
     todoTasks=d.todoTasks||[]; lastResetDate=d.lastResetDate||null;
-    baseMultiplier=d.baseMultiplier||1;
+    baseMultiplier=d.baseMultiplier||1; x2Completed=d.x2Completed||[];
   }
   checkDailyReset();
   buildQuests(); buildTodo(); updateUI(); updateTimeline();
@@ -462,7 +493,7 @@ async function loadData(){
 
 function saveData(){
   set(ref(db,'users/'+userId),
-    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier});
+    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier,x2Completed});
 }
 
 function buildQuests(){
@@ -472,12 +503,15 @@ function buildQuests(){
   baseQuests.forEach(([name,val,type])=>{
     const display=name==='Swimming'?val:Math.round(val*m);
     const q=document.createElement('div');
-    q.className='quest'+(completed.includes(name)?' done':'');
+    const isX2=x2Completed.includes(name);
+    const isDone=completed.includes(name);
+    q.className='quest'+(isDone?' done':'')+(isX2?' x2done':'');
     q.dataset.name=name;
     q.innerHTML=
-      `<div class="check ${completed.includes(name)?'checked':''}"
+      `<div class="check ${isDone?'checked':''}"
         onclick="toggleQuest(this)"></div>
-       <span>${name} – ${display} ${type}</span>`;
+       <span>${name} – ${display} ${type}</span>
+       <button class="multiplier-btn" onclick="toggleQuestX2(event)">×2</button>`;
     wrap.appendChild(q);
   });
 }
@@ -488,6 +522,19 @@ window.toggleQuest=function(box){
   if(completed.includes(name)) return;
   completed.push(name);
   if(name!=='Swimming'){ str++; end++; exp+=10; }
+  if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
+  saveData(); buildQuests(); updateUI(); updateTimeline();
+};
+
+window.toggleQuestX2=function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const quest=e.target.parentElement;
+  const name=quest.dataset.name;
+  if(completed.includes(name)) return;
+  completed.push(name);
+  x2Completed.push(name);
+  if(name!=='Swimming'){ str+=2; end+=2; exp+=20; }
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
   saveData(); buildQuests(); updateUI(); updateTimeline();
 };
