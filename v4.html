@@ -431,6 +431,17 @@ function initSystem(){
 let level=1, exp=0, expNeeded=100, str=0, end=0,
     completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[];
 
+const levelEl=document.getElementById('level');
+const rankEl=document.getElementById('rank');
+const expEl=document.getElementById('exp');
+const strEl=document.getElementById('str');
+const endEl=document.getElementById('end');
+const todoList=document.getElementById('todoList');
+const newTask=document.getElementById('newTask');
+const addBtn=document.getElementById('addBtn');
+const missedStreak=document.getElementById('missedStreak');
+const currentStreak=document.getElementById('currentStreak');
+
 const baseQuests=[
   ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
   ['Dips',100,'reps'], ['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'],
@@ -552,6 +563,7 @@ window.toggleQuestX2=function(e){
     if(name!=='Swimming'){ str+=1; end+=1; exp+=10; }
   }else{
     completed.push(name);
+    if(name!=='Swimming'){ str+=2; end+=2; exp+=20; }
   }
   
   x2Completed.push(name);
