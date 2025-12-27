@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Daily System</title>
+<title>Solo Leveling – Daily System</title>
 
 <style>
 :root {
@@ -48,6 +48,7 @@ html, body {
   flex-direction:column;
   align-items:center;
   overflow:hidden;
+  justify-content:flex-start;
 }
 
 h1 {
@@ -94,11 +95,17 @@ h1 {
   padding:12px;
   cursor:pointer;
   display:flex;
-  justify-content:space-between;
+  justify-content:center;
   align-items:center;
   user-select:none;
   font-weight:bold;
   font-size:1rem;
+  text-align:center;
+  position:relative;
+}
+.section-header span:last-child {
+  position:absolute;
+  right:12px;
 }
 .section-content {
   max-height:0;
@@ -108,6 +115,8 @@ h1 {
   flex-direction:column;
   gap:6px;
   padding:0 12px;
+  width:100%;
+  box-sizing:border-box;
 }
 .section-content.open {
   overflow-y:auto;
@@ -117,7 +126,8 @@ h1 {
 .quests {
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:8px;
+  width:100%;
 }
 
 .quest {
@@ -131,14 +141,33 @@ h1 {
   transition:all 0.3s ease;
   user-select:none;
 }
+.quest:hover {
+  border-color:var(--accent);
+  box-shadow:0 0 12px rgba(79,195,255,.2);
+}
 .quest.done span { opacity:0.6; }
-.quest.dragging { opacity:0.4; }
+.quest.dragging { 
+  opacity:0.5; 
+  transform:scale(0.98);
+  background:rgba(79,195,255,.1);
+  border-color:var(--accent);
+  box-shadow:0 0 20px rgba(79,195,255,.4);
+}
 
 .drag-handle {
   cursor:grab;
   user-select:none;
   color:var(--muted);
   font-weight:bold;
+  transition:all 0.2s;
+}
+.quest:hover .drag-handle {
+  color:var(--accent);
+  transform:scale(1.3);
+}
+.quest.dragging .drag-handle {
+  color:var(--accent2);
+  transform:scale(1.5);
 }
 
 .check {
@@ -175,14 +204,20 @@ h1 {
   font-weight:bold;
 }
 
-/* ✅ GREEN NEON DRAG LINE */
+/* ✅ NEON GREEN DROP LINE (ADDED) */
 .drag-line {
-  height:2px;
-  background:var(--accent2);
-  box-shadow:0 0 12px rgba(124,255,154,.9);
+  height:3px;
+  background:linear-gradient(90deg, transparent, var(--accent2), transparent);
+  box-shadow:0 0 16px rgba(124,255,154,1), inset 0 0 8px rgba(124,255,154,.6);
   border-radius:2px;
-  margin:4px 0;
+  margin:6px 0;
   pointer-events:none;
+  animation:pulse-glow 1s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity:0.8; box-shadow:0 0 16px rgba(124,255,154,1); }
+  50% { opacity:1; box-shadow:0 0 24px rgba(124,255,154,1), inset 0 0 12px rgba(124,255,154,.8); }
 }
 
 .footer {
@@ -208,6 +243,7 @@ h1 {
   display:flex;
   gap:8px;
   margin-bottom:10px;
+  box-sizing:border-box;
 }
 .todo-input input {
   flex:1;
@@ -267,7 +303,9 @@ h1 {
 
 <div class="system-container" style="display:none;">
   <div class="system">
-    <h1>DAILY QUEST</h1>
+
+    <h1>SYSTEM – DAILY QUEST</h1>
+    <h1>E-RANK</h1>
 
     <div class="status">
       <div class="card"><div class="label">LEVEL</div><div id="level" class="value">1</div></div>
@@ -302,6 +340,7 @@ h1 {
       <div id="currentStreak">Current Streak Days: 0</div>
       <div id="missedStreak">Missed Days: 0</div>
     </div>
+
   </div>
 </div>
 
@@ -317,18 +356,19 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const userId = 'defaultUser';
 
-/* ---------- PASSWORD ---------- */
-const overlay=document.getElementById('passwordOverlay');
-const input=document.getElementById('passwordInput');
-const errorMsg=document.getElementById('pwError');
+const overlay = document.getElementById('passwordOverlay');
+const input = document.getElementById('passwordInput');
+const errorMsg = document.getElementById('pwError');
 
-input.addEventListener('keydown',e=>{
+input.addEventListener('keydown', e=>{
   if(e.key==='Enter'){
     if(input.value==='K@ilesh13'){
       overlay.style.display='none';
       document.querySelector('.system-container').style.display='flex';
       initSystem();
-    }else errorMsg.style.opacity=1;
+    } else {
+      errorMsg.style.opacity=1;
+    }
   }
 });
 
@@ -337,18 +377,31 @@ let level=1, exp=0, expNeeded=100, str=0, end=0,
     completed=[], streakDays=0, missedDays=0, todoTasks=[];
 
 const baseQuests=[
- ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
- ['Dips',100,'reps'], ['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'],
- ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'],
- ['Plank',3,'mins'], ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'],
- ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
+  ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
+  ['Dips',100,'reps'], ['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'],
+  ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'],
+  ['Plank',3,'mins'], ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'],
+  ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
 ];
 
-/* GREEN DRAG LINE */
 const dragLine=document.createElement('div');
 dragLine.className='drag-line';
 
-/* ---------- FIREBASE ---------- */
+function autoExpandTodo(){
+  const el=document.getElementById('todoContent');
+  if(!el.classList.contains('open')) el.classList.add('open');
+  el.style.maxHeight=el.scrollHeight+'px';
+}
+
+function getMultiplier(){ return 1+(level-1)*0.05; }
+function getRank(totalExp){
+  if(totalExp<10000)return'E'; if(totalExp<20000)return'D';
+  if(totalExp<30000)return'C'; if(totalExp<40000)return'B';
+  if(totalExp<50000)return'A'; if(totalExp<60000)return'S';
+  if(totalExp<70000)return'SS'; if(totalExp<80000)return'SSS';
+  if(totalExp<90000)return'SSS+'; return'∞';
+}
+
 async function loadData(){
   const snap=await get(ref(db,'users/'+userId));
   const d=snap.val();
@@ -366,9 +419,6 @@ function saveData(){
     {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks});
 }
 
-/* ---------- WORKOUT ---------- */
-function getMultiplier(){ return 1+(level-1)*0.05; }
-
 function buildQuests(){
   const wrap=document.getElementById('workoutsContent');
   wrap.innerHTML='';
@@ -380,7 +430,7 @@ function buildQuests(){
     q.dataset.name=name;
     q.innerHTML=
       `<div class="check ${completed.includes(name)?'checked':''}"
-       onclick="toggleQuest(this)"></div>
+        onclick="toggleQuest(this)"></div>
        <span>${name} – ${display} ${type}</span>`;
     wrap.appendChild(q);
   });
@@ -396,36 +446,41 @@ window.toggleQuest=function(box){
   saveData(); buildQuests(); updateUI(); updateTimeline();
 };
 
-/* ---------- UI ---------- */
 window.toggleSection=function(id){
   const el=document.getElementById(id);
   if(el.classList.contains('open')){
-    el.classList.remove('open'); el.style.maxHeight='0';
+    el.classList.remove('open');
+    el.style.maxHeight='0';
   }else{
-    el.classList.add('open'); el.style.maxHeight=el.scrollHeight+'px';
+    el.classList.add('open');
+    el.style.maxHeight=el.scrollHeight+'px';
   }
 };
 
 function updateUI(){
-  level.textContent=level;
-  rank.textContent='E';
-  exp.textContent=`${exp} / ${expNeeded}`;
-  str.textContent=str;
-  end.textContent=end;
+  levelEl.textContent=level;
+  rankEl.textContent=getRank(level*10);
+  expEl.textContent=`${exp} / ${expNeeded}`;
+  strEl.textContent=str;
+  endEl.textContent=end;
 }
+
 function updateTimeline(){
   currentStreak.textContent=`Current Streak Days: ${streakDays}`;
   missedStreak.textContent=`Missed Days: ${missedDays}`;
 }
 
-/* ---------- TODO (GREEN LINE DRAG) ---------- */
+/* -------- TODO (ORIGINAL LOGIC + ADDITIONS ONLY) -------- */
+let draggedIndex=-1;
+
 function buildTodo(){
-  const list=document.getElementById('todoList');
+  const list=todoList;
   list.innerHTML='';
   todoTasks.forEach((task,index)=>{
     const div=document.createElement('div');
     div.className='quest';
     div.draggable=true;
+    div.dataset.index=index;
 
     div.innerHTML=`
       <span class="drag-handle">::</span>
@@ -438,33 +493,61 @@ function buildTodo(){
       task.done=!task.done; saveData(); buildTodo();
     };
     div.querySelector('.delete-btn').onclick=()=>{
-      todoTasks.splice(index,1); saveData(); buildTodo();
+      todoTasks.splice(index,1); saveData(); buildTodo(); autoExpandTodo();
     };
 
     div.addEventListener('dragstart',e=>{
+      draggedIndex=index;
+      e.dataTransfer.effectAllowed='move';
       e.dataTransfer.setData('text/plain',index);
-      div.classList.add('dragging');
+      setTimeout(()=>div.classList.add('dragging'),0);
+      autoExpandTodo();
     });
+    
     div.addEventListener('dragend',()=>{
       div.classList.remove('dragging');
+      draggedIndex=-1;
       dragLine.remove();
+      list.querySelectorAll('.quest').forEach(q=>q.style.opacity='');
     });
+    
     div.addEventListener('dragover',e=>{
+      if(draggedIndex===-1) return;
       e.preventDefault();
-      const r=div.getBoundingClientRect();
+      e.dataTransfer.dropEffect='move';
       dragLine.remove();
-      (e.clientY-r.top>r.height/2)
-        ?div.after(dragLine)
-        :div.before(dragLine);
+      
+      const rect=div.getBoundingClientRect();
+      const isBottom=e.clientY-rect.top>rect.height/2;
+      const currentIndex=parseInt(div.dataset.index);
+      
+      if(draggedIndex!==currentIndex){
+        isBottom?div.after(dragLine):div.before(dragLine);
+      }
+      
+      list.querySelectorAll('.quest').forEach((q,i)=>{
+        if(i!==draggedIndex) q.style.opacity='0.7';
+      });
     });
+    
+    div.addEventListener('dragleave',()=>{
+      if(!div.contains(e.relatedTarget)) dragLine.remove();
+    });
+    
     div.addEventListener('drop',e=>{
       e.preventDefault();
       dragLine.remove();
-      const from=parseInt(e.dataTransfer.getData('text/plain'));
-      if(from===index) return;
+      const from=draggedIndex;
+      const to=parseInt(div.dataset.index);
+      
+      if(from===-1 || from===to) return;
+      
       const moved=todoTasks.splice(from,1)[0];
-      todoTasks.splice(index,0,moved);
-      saveData(); buildTodo();
+      todoTasks.splice(to,0,moved);
+      
+      saveData();
+      buildTodo();
+      autoExpandTodo();
     });
 
     list.appendChild(div);
@@ -476,8 +559,14 @@ addBtn.onclick=()=>{
   if(!v) return;
   todoTasks.push({text:v,done:false});
   newTask.value='';
-  saveData(); buildTodo();
+  saveData(); buildTodo(); autoExpandTodo();
 };
+
+newTask.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    addBtn.click();
+  }
+});
 
 loadData();
 }
