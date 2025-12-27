@@ -40,15 +40,21 @@ html, body {
   max-width:1200px;
   height:95%;
   background:linear-gradient(180deg,#0e1624,#0a111d);
-  border:1px solid #1c2a44;
+  border:2px solid #1c2a44;
   border-radius:16px;
-  box-shadow:0 0 50px rgba(79,195,255,.3);
+  box-shadow:0 0 50px rgba(79,195,255,.3), inset 0 0 30px rgba(79,195,255,.1);
   padding:20px;
   display:flex;
   flex-direction:column;
   align-items:center;
   overflow:hidden;
   justify-content:flex-start;
+  animation:borderGlow 3s ease-in-out infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% { box-shadow:0 0 50px rgba(79,195,255,.3), inset 0 0 30px rgba(79,195,255,.1); }
+  50% { box-shadow:0 0 70px rgba(79,195,255,.5), inset 0 0 40px rgba(79,195,255,.2); }
 }
 
 h1 {
@@ -56,11 +62,16 @@ h1 {
   color:var(--accent);
   text-align:center;
   margin-bottom:16px;
-  animation:fadeInDown 1s ease;
+  animation:fadeInDown 1s ease, glow 2s ease-in-out infinite;
+  text-shadow:0 0 10px rgba(79,195,255,.8), 0 0 20px rgba(79,195,255,.4);
 }
 @keyframes fadeInDown {
   from {opacity:0; transform:translateY(-30px);}
   to {opacity:1; transform:translateY(0);}
+}
+@keyframes glow {
+  0%, 100% { text-shadow:0 0 10px rgba(79,195,255,.8), 0 0 20px rgba(79,195,255,.4); }
+  50% { text-shadow:0 0 20px rgba(79,195,255,1), 0 0 30px rgba(79,195,255,.6); }
 }
 
 .status {
@@ -72,14 +83,21 @@ h1 {
 }
 
 .card {
-  background:var(--panel);
-  border:1px solid #1c2a44;
+  background:linear-gradient(135deg, rgba(20,30,50,.8), rgba(14,22,36,.8));
+  border:1.5px solid #1c2a44;
   border-radius:12px;
   padding:12px;
   text-align:center;
+  box-shadow:0 0 20px rgba(79,195,255,.2), inset 0 0 10px rgba(79,195,255,.1);
+  transition:all 0.3s ease;
 }
-.card .label { font-size:.8rem; color:var(--muted); }
-.card .value { font-size:1.3rem; margin-top:4px; }
+.card:hover {
+  border-color:var(--accent);
+  box-shadow:0 0 30px rgba(79,195,255,.4), inset 0 0 15px rgba(79,195,255,.2);
+  transform:translateY(-2px);
+}
+.card .label { font-size:.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+.card .value { font-size:1.3rem; margin-top:4px; color:var(--accent); font-weight:bold; text-shadow:0 0 10px rgba(79,195,255,.6); }
 
 .section {
   width:100%;
@@ -91,7 +109,7 @@ h1 {
   flex-direction:column;
 }
 .section-header {
-  background:var(--panel);
+  background:linear-gradient(90deg, rgba(14,22,36,.8), rgba(20,30,50,.8));
   padding:12px;
   cursor:pointer;
   display:flex;
@@ -102,6 +120,13 @@ h1 {
   font-size:1rem;
   text-align:center;
   position:relative;
+  box-shadow:0 0 20px rgba(79,195,255,.2), inset 0 0 10px rgba(79,195,255,.05);
+  transition:all 0.3s ease;
+  color:var(--accent);
+}
+.section-header:hover {
+  box-shadow:0 0 30px rgba(79,195,255,.4), inset 0 0 15px rgba(79,195,255,.1);
+  text-shadow:0 0 10px rgba(79,195,255,.8);
 }
 .section-header span:last-child {
   position:absolute;
@@ -131,19 +156,21 @@ h1 {
 }
 
 .quest {
-  background:var(--panel);
-  border:1px solid #1c2a44;
+  background:linear-gradient(135deg, rgba(14,22,36,.9), rgba(20,30,50,.9));
+  border:1.5px solid #1c2a44;
   border-radius:12px;
   padding:10px;
   display:flex;
   align-items:center;
   gap:12px;
-  transition:all 0.3s ease;
+  transition:all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select:none;
+  box-shadow:0 0 15px rgba(79,195,255,.1);
 }
 .quest:hover {
   border-color:var(--accent);
-  box-shadow:0 0 12px rgba(79,195,255,.2);
+  box-shadow:0 0 25px rgba(79,195,255,.3), inset 0 0 10px rgba(79,195,255,.1);
+  transform:translateX(4px);
 }
 .quest.done span { opacity:0.6; }
 .quest.x2done { 
@@ -211,6 +238,12 @@ h1 {
   cursor:pointer;
   color:var(--danger);
   font-weight:bold;
+  transition:all 0.2s;
+}
+
+.delete-btn:hover {
+  text-shadow:0 0 10px rgba(255,95,95,.8);
+  transform:scale(1.15);
 }
 
 .multiplier-btn {
@@ -218,16 +251,20 @@ h1 {
   cursor:pointer;
   color:var(--danger);
   font-weight:bold;
-  background:rgba(255,95,95,.2);
-  border:1px solid var(--danger);
+  background:linear-gradient(135deg, rgba(255,95,95,.25), rgba(255,95,95,.15));
+  border:1.5px solid var(--danger);
   padding:4px 8px;
   border-radius:6px;
   transition:all 0.2s;
+  text-shadow:0 0 10px rgba(255,95,95,.8);
+  box-shadow:0 0 10px rgba(255,95,95,.2);
 }
 
 .multiplier-btn:hover {
-  background:rgba(255,95,95,.4);
-  box-shadow:0 0 12px rgba(255,95,95,.6);
+  background:linear-gradient(135deg, rgba(255,95,95,.4), rgba(255,95,95,.25));
+  box-shadow:0 0 20px rgba(255,95,95,.6), inset 0 0 10px rgba(255,95,95,.2);
+  transform:scale(1.05);
+  text-shadow:0 0 15px rgba(255,95,95,1);
 }
 
 .multiplier-btn:active {
@@ -279,19 +316,33 @@ h1 {
   flex:1;
   padding:8px;
   border-radius:6px;
-  border:1px solid #1c2a44;
-  background:var(--panel);
+  border:1.5px solid #1c2a44;
+  background:linear-gradient(135deg, rgba(14,22,36,.9), rgba(20,30,50,.9));
   color:var(--text);
+  box-shadow:0 0 15px rgba(79,195,255,.1), inset 0 0 8px rgba(79,195,255,.05);
+  transition:all 0.3s ease;
 }
+
+.todo-input input:focus {
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 25px rgba(79,195,255,.3), inset 0 0 10px rgba(79,195,255,.1);
+}
+
 .todo-input button {
   padding:8px 14px;
   border-radius:6px;
   border:none;
-  background:var(--accent);
+  background:linear-gradient(135deg, var(--accent), rgba(79,195,255,.8));
   color:#000;
   cursor:pointer;
   font-weight:bold;
-}
+  transition:all 0.2s;
+  box-shadow:0 0 15px rgba(79,195,255,.3);\n}
+
+.todo-input button:hover {
+  box-shadow:0 0 25px rgba(79,195,255,.6), inset 0 0 10px rgba(79,195,255,.2);
+  transform:translateY(-2px);\n}
 
 /* Password overlay */
 #passwordOverlay {
@@ -349,6 +400,100 @@ h1 {
   scrollbar-color: rgba(79,195,255,.8) rgba(79,195,255,.05);
   scrollbar-width: thin;
 }
+
+/* ⚡ RANK REVEAL OVERLAY */
+#rankRevealOverlay {
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg, #070b12 0%, #0a111d 50%, #070b12 100%);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:2000;
+  backdrop-filter:blur(4px);
+  animation:revealFadeIn 0.6s ease-out;
+}
+
+@keyframes revealFadeIn {
+  from { opacity:0; backdrop-filter:blur(0px); }
+  to { opacity:1; backdrop-filter:blur(4px); }
+}
+
+.rank-display {
+  text-align:center;
+  animation:rankPopUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes rankPopUp {
+  0% {
+    transform:scale(0) rotateZ(-15deg);
+    opacity:0;
+  }
+  50% {
+    opacity:1;
+  }
+  100% {
+    transform:scale(1) rotateZ(0deg);
+    opacity:1;
+  }
+}
+
+.rank-text {
+  font-size:15vw;
+  font-weight:bold;
+  background:linear-gradient(135deg, var(--accent), var(--accent2), var(--accent));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 0 80px rgba(79,195,255,.8), 0 0 120px rgba(124,255,154,.4);
+  letter-spacing:8px;
+  margin-bottom:20px;
+  animation:rankGlowPulse 1.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 40px rgba(79,195,255,.6)) drop-shadow(0 0 60px rgba(124,255,154,.3));
+}
+
+@keyframes rankGlowPulse {
+  0%, 100% {
+    transform:scale(1);
+    filter:drop-shadow(0 0 40px rgba(79,195,255,.6)) drop-shadow(0 0 60px rgba(124,255,154,.3));
+  }
+  50% {
+    transform:scale(1.05);
+    filter:drop-shadow(0 0 60px rgba(79,195,255,.8)) drop-shadow(0 0 80px rgba(124,255,154,.5));
+  }
+}
+
+.rank-label {
+  font-size:3rem;
+  letter-spacing:4px;
+  color:var(--accent);
+  text-shadow:0 0 30px rgba(79,195,255,.8), 0 0 50px rgba(79,195,255,.4);
+  font-weight:bold;
+  animation:labelFadeIn 0.8s ease-out 0.3s both;
+}
+
+@keyframes labelFadeIn {
+  from {
+    opacity:0;
+    transform:translateY(20px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+@keyframes revealFadeOut {
+  0% {
+    opacity:1;
+    backdrop-filter:blur(4px);
+  }
+  100% {
+    opacity:0;
+    backdrop-filter:blur(0px);
+    pointer-events:none;
+  }
+}
 </style>
 </head>
 
@@ -357,6 +502,13 @@ h1 {
 <div id="passwordOverlay">
   <input type="password" id="passwordInput" placeholder="Enter Password" autofocus>
   <span id="pwError">Unauthorized Access</span>
+</div>
+
+<div id="rankRevealOverlay" style="display:none;">
+  <div class="rank-display">
+    <div class="rank-text" id="rankDisplay">E</div>
+    <div class="rank-label">RANK</div>
+  </div>
 </div>
 
 <div class="system-container" style="display:none;">
@@ -415,19 +567,33 @@ const overlay = document.getElementById('passwordOverlay');
 const input = document.getElementById('passwordInput');
 const errorMsg = document.getElementById('pwError');
 
+async function handlePasswordSuccess(){
+  overlay.style.display='none';
+  const rankOverlay=document.getElementById('rankRevealOverlay');
+  rankOverlay.style.display='flex';
+  
+  await initSystem();
+  
+  setTimeout(()=>{
+    rankOverlay.style.animation='revealFadeOut 0.8s ease-in forwards';
+    setTimeout(()=>{
+      rankOverlay.style.display='none';
+      document.querySelector('.system-container').style.display='flex';
+    }, 800);
+  }, 2500);
+}
+
 input.addEventListener('keydown', e=>{
   if(e.key==='Enter'){
     if(input.value==='K@ilesh13'){
-      overlay.style.display='none';
-      document.querySelector('.system-container').style.display='flex';
-      initSystem();
+      handlePasswordSuccess();
     } else {
       errorMsg.style.opacity=1;
     }
   }
 });
 
-function initSystem(){
+async function initSystem(){
 let level=1, exp=0, expNeeded=100, str=0, end=0,
     completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[];
 
@@ -499,6 +665,8 @@ async function loadData(){
     baseMultiplier=d.baseMultiplier||1; x2Completed=d.x2Completed||[];
   }
   checkDailyReset();
+  const rank=getRank(level*10);
+  document.getElementById('rankDisplay').textContent=rank;
   buildQuests(); buildTodo(); updateUI(); updateTimeline();
 }
 
@@ -693,7 +861,7 @@ newTask.addEventListener('keydown',e=>{
   }
 });
 
-loadData();
+await loadData();
 }
 </script>
 </body>
