@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Solo Leveling – Daily System</title>
+<title>Daily System</title>
+
 <style>
 :root {
   --bg:#070b12;
@@ -16,7 +17,14 @@
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 
-html, body { width:100%; height:100%; font-family: 'Times New Roman', Times, serif;font-style: italic; background:#070b12; color:var(--text); }
+html, body {
+  width:100%;
+  height:100%;
+  font-family:'Times New Roman', Times, serif;
+  font-style:italic;
+  background:#070b12;
+  color:var(--text);
+}
 
 .system-container {
   width:100%;
@@ -30,7 +38,7 @@ html, body { width:100%; height:100%; font-family: 'Times New Roman', Times, ser
 .system {
   width:100%;
   max-width:1200px;
-  height:95%; /* 95% of browser height */
+  height:95%;
   background:linear-gradient(180deg,#0e1624,#0a111d);
   border:1px solid #1c2a44;
   border-radius:16px;
@@ -42,43 +50,214 @@ html, body { width:100%; height:100%; font-family: 'Times New Roman', Times, ser
   overflow:hidden;
 }
 
-h1 { font-size:2rem; color:var(--accent); text-align:center; margin-bottom:16px; animation:fadeInDown 1s ease; }
-@keyframes fadeInDown { from {opacity:0; transform:translateY(-30px);} to {opacity:1; transform:translateY(0);} }
+h1 {
+  font-size:2rem;
+  color:var(--accent);
+  text-align:center;
+  margin-bottom:16px;
+  animation:fadeInDown 1s ease;
+}
+@keyframes fadeInDown {
+  from {opacity:0; transform:translateY(-30px);}
+  to {opacity:1; transform:translateY(0);}
+}
 
-.status { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:10px; margin-bottom:20px; width:100%; }
-.card { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:12px; text-align:center; }
+.status {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+  gap:10px;
+  margin-bottom:20px;
+  width:100%;
+}
+
+.card {
+  background:var(--panel);
+  border:1px solid #1c2a44;
+  border-radius:12px;
+  padding:12px;
+  text-align:center;
+}
 .card .label { font-size:.8rem; color:var(--muted); }
 .card .value { font-size:1.3rem; margin-top:4px; }
 
-.section { width:100%; margin-bottom:15px; border:1px solid #1c2a44; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; }
-.section-header { background:var(--panel); padding:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; user-select:none; font-weight:bold; font-size:1rem; }
-.section-content { max-height:0; overflow:hidden; transition:max-height 0.4s ease, padding 0.4s ease; display:flex; flex-direction:column; gap:6px; padding:0 12px; }
-.section-content.open { overflow-y:auto; padding:12px; }
+.section {
+  width:100%;
+  margin-bottom:15px;
+  border:1px solid #1c2a44;
+  border-radius:12px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+.section-header {
+  background:var(--panel);
+  padding:12px;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  user-select:none;
+  font-weight:bold;
+  font-size:1rem;
+}
+.section-content {
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.4s ease, padding 0.4s ease;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding:0 12px;
+}
+.section-content.open {
+  overflow-y:auto;
+  padding:12px;
+}
 
-.quests { display:flex; flex-direction:column; gap:6px; }
-.quest { background:var(--panel); border:1px solid #1c2a44; border-radius:12px; padding:10px; display:flex; align-items:center; gap:12px; transition: all 0.3s ease; user-select:none; }
-.quest.done span { opacity:0.6; text-decoration: none; } /* partially faded, not fully strikethrough */
-.drag-handle { cursor:grab; user-select:none; color:var(--muted); font-weight:bold; }
-.check { width:24px; height:24px; border-radius:6px; border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all 0.25s; flex-shrink:0; }
-.check.checked { background:var(--accent); box-shadow:0 0 14px rgba(79,195,255,.8); }
-.check.checked::after { content:'✓'; color:#000; font-weight:700; animation:pop .25s ease-out; }
-@keyframes pop { from { transform:scale(.3); opacity:0; } to { transform:scale(1); opacity:1; } }
-.delete-btn { margin-left:auto; cursor:pointer; color:var(--danger); font-weight:bold; }
+.quests {
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
 
-.footer { margin-top:16px; text-align:center; font-size:.8rem; color:var(--muted); width:100%; }
-.timeline { margin-top:16px; font-size:0.9rem; color:var(--muted); text-align:center; width:100%; display:flex; justify-content:space-between; }
-.timeline div { flex:1; text-align:center; }
+.quest {
+  background:var(--panel);
+  border:1px solid #1c2a44;
+  border-radius:12px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  transition:all 0.3s ease;
+  user-select:none;
+}
+.quest.done span { opacity:0.6; }
+.quest.dragging { opacity:0.4; }
 
-.todo-input { width:100%; display:flex; gap:8px; margin-bottom:10px; }
-.todo-input input { flex:1; padding:8px; border-radius:6px; border:1px solid #1c2a44; background:var(--panel); color:var(--text); }
-.todo-input button { padding:8px 14px; border-radius:6px; border:none; background:var(--accent); color:#000; cursor:pointer; font-weight:bold; }
+.drag-handle {
+  cursor:grab;
+  user-select:none;
+  color:var(--muted);
+  font-weight:bold;
+}
+
+.check {
+  width:24px;
+  height:24px;
+  border-radius:6px;
+  border:2px solid var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all 0.25s;
+  flex-shrink:0;
+}
+.check.checked {
+  background:var(--accent);
+  box-shadow:0 0 14px rgba(79,195,255,.8);
+}
+.check.checked::after {
+  content:'✓';
+  color:#000;
+  font-weight:700;
+  animation:pop .25s ease-out;
+}
+@keyframes pop {
+  from { transform:scale(.3); opacity:0; }
+  to { transform:scale(1); opacity:1; }
+}
+
+.delete-btn {
+  margin-left:auto;
+  cursor:pointer;
+  color:var(--danger);
+  font-weight:bold;
+}
+
+/* ✅ GREEN NEON DRAG LINE */
+.drag-line {
+  height:2px;
+  background:var(--accent2);
+  box-shadow:0 0 12px rgba(124,255,154,.9);
+  border-radius:2px;
+  margin:4px 0;
+  pointer-events:none;
+}
+
+.footer {
+  margin-top:16px;
+  text-align:center;
+  font-size:.8rem;
+  color:var(--muted);
+  width:100%;
+}
+.timeline {
+  margin-top:16px;
+  font-size:0.9rem;
+  color:var(--muted);
+  text-align:center;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+}
+.timeline div { flex:1; }
+
+.todo-input {
+  width:100%;
+  display:flex;
+  gap:8px;
+  margin-bottom:10px;
+}
+.todo-input input {
+  flex:1;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #1c2a44;
+  background:var(--panel);
+  color:var(--text);
+}
+.todo-input button {
+  padding:8px 14px;
+  border-radius:6px;
+  border:none;
+  background:var(--accent);
+  color:#000;
+  cursor:pointer;
+  font-weight:bold;
+}
 
 /* Password overlay */
-#passwordOverlay { position:fixed; top:0; left:0; width:100%; height:100%; background:black; display:flex; justify-content:center; align-items:center; z-index:1000; flex-direction:column; }
-#passwordOverlay input { padding:12px; font-size:1.2rem; border-radius:8px; border:none; background:#111; color:#fff; text-align:center; width:220px; }
-#passwordOverlay span { color:red; margin-top:12px; font-size:1rem; opacity:0; transition:opacity 0.3s; }
+#passwordOverlay {
+  position:fixed;
+  inset:0;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+  flex-direction:column;
+}
+#passwordOverlay input {
+  padding:12px;
+  font-size:1.2rem;
+  border-radius:8px;
+  border:none;
+  background:#111;
+  color:#fff;
+  text-align:center;
+  width:220px;
+}
+#passwordOverlay span {
+  color:red;
+  margin-top:12px;
+  font-size:1rem;
+  opacity:0;
+  transition:opacity 0.3s;
+}
 </style>
 </head>
+
 <body>
 
 <div id="passwordOverlay">
@@ -88,8 +267,7 @@ h1 { font-size:2rem; color:var(--accent); text-align:center; margin-bottom:16px;
 
 <div class="system-container" style="display:none;">
   <div class="system">
-    <h1>SYSTEM – DAILY QUEST</h1>
-    <h1>E-RANK</h1>
+    <h1>DAILY QUEST</h1>
 
     <div class="status">
       <div class="card"><div class="label">LEVEL</div><div id="level" class="value">1</div></div>
@@ -100,12 +278,16 @@ h1 { font-size:2rem; color:var(--accent); text-align:center; margin-bottom:16px;
     </div>
 
     <div class="section">
-      <div class="section-header" onclick="toggleSection('workoutsContent')">Workout <span>&#9660;</span></div>
+      <div class="section-header" onclick="toggleSection('workoutsContent')">
+        Workout <span>&#9660;</span>
+      </div>
       <div class="section-content" id="workoutsContent"></div>
     </div>
 
     <div class="section">
-      <div class="section-header" onclick="toggleSection('todoContent')">To Do <span>&#9660;</span></div>
+      <div class="section-header" onclick="toggleSection('todoContent')">
+        To Do <span>&#9660;</span>
+      </div>
       <div class="section-content" id="todoContent">
         <div class="todo-input">
           <input type="text" id="newTask" placeholder="Add new task and press Enter">
@@ -135,174 +317,170 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const userId = 'defaultUser';
 
-// PASSWORD CHECK
-const overlay = document.getElementById('passwordOverlay');
-const input = document.getElementById('passwordInput');
-const errorMsg = document.getElementById('pwError');
+/* ---------- PASSWORD ---------- */
+const overlay=document.getElementById('passwordOverlay');
+const input=document.getElementById('passwordInput');
+const errorMsg=document.getElementById('pwError');
 
-input.addEventListener('keydown', e=>{
+input.addEventListener('keydown',e=>{
   if(e.key==='Enter'){
     if(input.value==='K@ilesh13'){
       overlay.style.display='none';
       document.querySelector('.system-container').style.display='flex';
       initSystem();
-    } else {
-      errorMsg.style.opacity=1;
-    }
+    }else errorMsg.style.opacity=1;
   }
 });
 
 function initSystem(){
-let level=1, exp=0, expNeeded=100, str=0, end=0, completed=[], streakDays=0, missedDays=0, todoTasks=[];
+let level=1, exp=0, expNeeded=100, str=0, end=0,
+    completed=[], streakDays=0, missedDays=0, todoTasks=[];
 
-const baseQuests=[['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'], ['Dips',100,'reps'],
-['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'], ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'],
-['Plank',3,'mins'], ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'], ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']];
+const baseQuests=[
+ ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
+ ['Dips',100,'reps'], ['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'],
+ ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'],
+ ['Plank',3,'mins'], ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'],
+ ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
+];
 
-function getMultiplier(){ return 1+(level-1)*0.05; }
-function getRank(totalExp){ if(totalExp<10000)return'E'; if(totalExp<20000)return'D'; if(totalExp<30000)return'C';
-if(totalExp<40000)return'B'; if(totalExp<50000)return'A'; if(totalExp<60000)return'S';
-if(totalExp<70000)return'SS'; if(totalExp<80000)return'SSS'; if(totalExp<90000)return'SSS+'; return'∞'; }
+/* GREEN DRAG LINE */
+const dragLine=document.createElement('div');
+dragLine.className='drag-line';
 
+/* ---------- FIREBASE ---------- */
 async function loadData(){
-  try{
-    const snapshot=await get(ref(db,'users/'+userId));
-    const data=snapshot.val();
-    if(data){
-      level=data.level||1; exp=data.exp||0; expNeeded=data.expNeeded||100;
-      str=data.str||0; end=data.end||0; completed=data.completed||[];
-      streakDays=data.streakDays||0; missedDays=data.missedDays||0;
-      todoTasks=data.todoTasks||[];
-    }
-    buildQuests(); buildTodo(); updateUI(); updateTimeline();
-  } catch(e){ console.error('Firebase Load Error:', e); }
+  const snap=await get(ref(db,'users/'+userId));
+  const d=snap.val();
+  if(d){
+    level=d.level||1; exp=d.exp||0; expNeeded=d.expNeeded||100;
+    str=d.str||0; end=d.end||0; completed=d.completed||[];
+    streakDays=d.streakDays||0; missedDays=d.missedDays||0;
+    todoTasks=d.todoTasks||[];
+  }
+  buildQuests(); buildTodo(); updateUI(); updateTimeline();
 }
 
 function saveData(){
-  set(ref(db,'users/'+userId),{level, exp, expNeeded, str, end, completed, streakDays, missedDays, todoTasks});
+  set(ref(db,'users/'+userId),
+    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks});
 }
 
+/* ---------- WORKOUT ---------- */
+function getMultiplier(){ return 1+(level-1)*0.05; }
+
 function buildQuests(){
-  const wrap=document.getElementById('workoutsContent'); wrap.innerHTML='';
+  const wrap=document.getElementById('workoutsContent');
+  wrap.innerHTML='';
   const m=getMultiplier();
   baseQuests.forEach(([name,val,type])=>{
-    let displayVal = name==='Swimming' ? val : Math.round(val*m); // Swimming stays constant
+    const display=name==='Swimming'?val:Math.round(val*m);
     const q=document.createElement('div');
     q.className='quest'+(completed.includes(name)?' done':'');
     q.dataset.name=name;
-    q.innerHTML=`<div class='check ${completed.includes(name)?'checked':''}' onclick='toggleQuest(this)'></div><span>${name} – ${displayVal} ${type}</span>`;
+    q.innerHTML=
+      `<div class="check ${completed.includes(name)?'checked':''}"
+       onclick="toggleQuest(this)"></div>
+       <span>${name} – ${display} ${type}</span>`;
     wrap.appendChild(q);
   });
 }
 
 window.toggleQuest=function(box){
-  const quest=box.parentElement; const name=quest.dataset.name;
-  if(completed.includes(name)) return; completed.push(name);
-  if(name!=='Swimming'){ str+=1; end+=1; exp+=10; } // Swimming doesn't increase stats
-  if(exp>=expNeeded){ level+=1; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
+  const quest=box.parentElement;
+  const name=quest.dataset.name;
+  if(completed.includes(name)) return;
+  completed.push(name);
+  if(name!=='Swimming'){ str++; end++; exp+=10; }
+  if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
   saveData(); buildQuests(); updateUI(); updateTimeline();
-}
+};
 
+/* ---------- UI ---------- */
 window.toggleSection=function(id){
   const el=document.getElementById(id);
-  if(el.classList.contains('open')){ el.style.maxHeight='0px'; el.classList.remove('open'); }
-  else{ el.classList.add('open'); el.style.maxHeight=el.scrollHeight+'px'; }
-}
+  if(el.classList.contains('open')){
+    el.classList.remove('open'); el.style.maxHeight='0';
+  }else{
+    el.classList.add('open'); el.style.maxHeight=el.scrollHeight+'px';
+  }
+};
 
 function updateUI(){
-  document.getElementById('level').textContent=level;
-  document.getElementById('rank').textContent=getRank(level*10);
-  document.getElementById('exp').textContent=`${exp} / ${expNeeded}`;
-  document.getElementById('str').textContent=str;
-  document.getElementById('end').textContent=end;
+  level.textContent=level;
+  rank.textContent='E';
+  exp.textContent=`${exp} / ${expNeeded}`;
+  str.textContent=str;
+  end.textContent=end;
 }
-
 function updateTimeline(){
-  document.getElementById('currentStreak').textContent=`Current Streak Days: ${streakDays}`;
-  document.getElementById('missedStreak').textContent=`Missed Days: ${missedDays}`;
+  currentStreak.textContent=`Current Streak Days: ${streakDays}`;
+  missedStreak.textContent=`Missed Days: ${missedDays}`;
 }
 
-// Todo Section (with delete and drag)
+/* ---------- TODO (GREEN LINE DRAG) ---------- */
 function buildTodo(){
-  const todoList=document.getElementById('todoList'); 
-  todoList.innerHTML='';
+  const list=document.getElementById('todoList');
+  list.innerHTML='';
   todoTasks.forEach((task,index)=>{
-    const div=document.createElement('div'); 
+    const div=document.createElement('div');
     div.className='quest';
-    div.draggable = true;
+    div.draggable=true;
 
-    const dragHandle = document.createElement('span');
-    dragHandle.className='drag-handle';
-    dragHandle.textContent='::';
+    div.innerHTML=`
+      <span class="drag-handle">::</span>
+      <div class="check ${task.done?'checked':''}"></div>
+      <span>${task.text}</span>
+      <span class="delete-btn">✕</span>
+    `;
 
-    const checkBox=document.createElement('div');
-    checkBox.className='check';
-    if(task.done) checkBox.classList.add('checked');
+    div.querySelector('.check').onclick=()=>{
+      task.done=!task.done; saveData(); buildTodo();
+    };
+    div.querySelector('.delete-btn').onclick=()=>{
+      todoTasks.splice(index,1); saveData(); buildTodo();
+    };
 
-    const span=document.createElement('span');
-    span.textContent = task.text;
-
-    const deleteBtn = document.createElement('span');
-    deleteBtn.className='delete-btn';
-    deleteBtn.textContent='✕';
-
-    // Events
-    checkBox.addEventListener('click', ()=>{
-      task.done = !task.done;
-      checkBox.classList.toggle('checked');
-      buildTodo(); // re-render to update opacity
-      saveData();
+    div.addEventListener('dragstart',e=>{
+      e.dataTransfer.setData('text/plain',index);
+      div.classList.add('dragging');
     });
-
-    deleteBtn.addEventListener('click', ()=>{
-      todoTasks.splice(index,1);
-      buildTodo();
-      saveData();
+    div.addEventListener('dragend',()=>{
+      div.classList.remove('dragging');
+      dragLine.remove();
     });
-
-    // Drag & Drop
-    div.addEventListener('dragstart', (e)=>{
-      e.dataTransfer.setData('text/plain', index);
-      e.currentTarget.style.opacity=0.4;
-    });
-    div.addEventListener('dragend', (e)=>{
-      e.currentTarget.style.opacity=1;
-    });
-    div.addEventListener('dragover', (e)=>{
+    div.addEventListener('dragover',e=>{
       e.preventDefault();
+      const r=div.getBoundingClientRect();
+      dragLine.remove();
+      (e.clientY-r.top>r.height/2)
+        ?div.after(dragLine)
+        :div.before(dragLine);
     });
-    div.addEventListener('drop', (e)=>{
+    div.addEventListener('drop',e=>{
       e.preventDefault();
-      const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-      const toIndex = index;
-      if(fromIndex === toIndex) return;
-      const movedItem = todoTasks.splice(fromIndex,1)[0];
-      todoTasks.splice(toIndex,0,movedItem);
-      buildTodo();
-      saveData();
+      dragLine.remove();
+      const from=parseInt(e.dataTransfer.getData('text/plain'));
+      if(from===index) return;
+      const moved=todoTasks.splice(from,1)[0];
+      todoTasks.splice(index,0,moved);
+      saveData(); buildTodo();
     });
 
-    div.appendChild(dragHandle);
-    div.appendChild(checkBox);
-    div.appendChild(span);
-    div.appendChild(deleteBtn);
-    todoList.appendChild(div);
+    list.appendChild(div);
   });
 }
 
-function addTodo(){
-  const val=document.getElementById('newTask').value.trim();
-  if(!val) return;
-  todoTasks.push({text:val, done:false});
-  document.getElementById('newTask').value='';
-  buildTodo(); saveData();
-}
-
-document.getElementById('newTask').addEventListener('keydown',e=>{ if(e.key==='Enter') addTodo(); });
-document.getElementById('addBtn').addEventListener('click',addTodo);
+addBtn.onclick=()=>{
+  const v=newTask.value.trim();
+  if(!v) return;
+  todoTasks.push({text:v,done:false});
+  newTask.value='';
+  saveData(); buildTodo();
+};
 
 loadData();
-} // end initSystem
+}
 </script>
 </body>
 </html>
