@@ -363,8 +363,7 @@ h1 {
 
     <div class="footer">Resets automatically at 00:00</div>
     <div class="timeline">
-      <div id="currentStreak">Current Streak Days: 0</div>
-      <div id="missedStreak">Missed Days: 0</div>
+      <div id="missedStreak">Daily Reset: Active</div>
     </div>
 
   </div>
@@ -400,7 +399,7 @@ input.addEventListener('keydown', e=>{
 
 function initSystem(){
 let level=1, exp=0, expNeeded=100, str=0, end=0,
-    completed=[], streakDays=0, missedDays=0, todoTasks=[];
+    completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1;
 
 const baseQuests=[
   ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
@@ -421,7 +420,7 @@ function autoExpandTodo(){
   });
 }
 
-function getMultiplier(){ return 1+(level-1)*0.05; }
+function getMultiplier(){ return (1+(level-1)*0.05)*baseMultiplier; }
 function getRank(totalExp){
   if(totalExp<10000)return'E'; if(totalExp<20000)return'D';
   if(totalExp<30000)return'C'; if(totalExp<40000)return'B';
@@ -430,6 +429,23 @@ function getRank(totalExp){
   if(totalExp<90000)return'SSS+'; return'∞';
 }
 
+function checkDailyReset(){
+  const today=new Date().toDateString();
+  if(lastResetDate!==today){
+    lastResetDate=today;
+    completed=[];
+    todoTasks=todoTasks.filter(task=>!task.done);
+    baseMultiplier+=0.05;
+    saveData();
+    buildQuests();
+    buildTodo();
+    updateUI();
+    updateTimeline();
+  }
+}
+
+setInterval(checkDailyReset, 60000);
+
 async function loadData(){
   const snap=await get(ref(db,'users/'+userId));
   const d=snap.val();
@@ -437,14 +453,16 @@ async function loadData(){
     level=d.level||1; exp=d.exp||0; expNeeded=d.expNeeded||100;
     str=d.str||0; end=d.end||0; completed=d.completed||[];
     streakDays=d.streakDays||0; missedDays=d.missedDays||0;
-    todoTasks=d.todoTasks||[];
+    todoTasks=d.todoTasks||[]; lastResetDate=d.lastResetDate||null;
+    baseMultiplier=d.baseMultiplier||1;
   }
+  checkDailyReset();
   buildQuests(); buildTodo(); updateUI(); updateTimeline();
 }
 
 function saveData(){
   set(ref(db,'users/'+userId),
-    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks});
+    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier});
 }
 
 function buildQuests(){
@@ -494,8 +512,7 @@ function updateUI(){
 }
 
 function updateTimeline(){
-  currentStreak.textContent=`Current Streak Days: ${streakDays}`;
-  missedStreak.textContent=`Missed Days: ${missedDays}`;
+  missedStreak.textContent=`Daily Reset: Active`;
 }
 
 /* -------- TODO (ORIGINAL LOGIC + ADDITIONS ONLY) -------- */
