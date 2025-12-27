@@ -390,7 +390,9 @@ dragLine.className='drag-line';
 function autoExpandTodo(){
   const el=document.getElementById('todoContent');
   if(!el.classList.contains('open')) el.classList.add('open');
-  el.style.maxHeight=el.scrollHeight+'px';
+  requestAnimationFrame(()=>{
+    el.style.maxHeight=el.scrollHeight+'px';
+  });
 }
 
 function getMultiplier(){ return 1+(level-1)*0.05; }
