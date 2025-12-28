@@ -338,11 +338,13 @@ h1 {
   cursor:pointer;
   font-weight:bold;
   transition:all 0.2s;
-  box-shadow:0 0 15px rgba(79,195,255,.3);\n}
+  box-shadow:0 0 15px rgba(79,195,255,.3);
+}
 
 .todo-input button:hover {
   box-shadow:0 0 25px rgba(79,195,255,.6), inset 0 0 10px rgba(79,195,255,.2);
-  transform:translateY(-2px);\n}
+  transform:translateY(-2px);
+}
 
 /* Password overlay */
 #passwordOverlay {
@@ -420,13 +422,22 @@ h1 {
 }
 
 .rank-display {
-  text-align:center;
-  animation:rankPopUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:40px;
 }
 
-@keyframes rankPopUp {
+.stat-item {
+  text-align:center;
+  animation:statPopUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.stat-rank { animation-delay:0s; }
+
+@keyframes statPopUp {
   0% {
-    transform:scale(0) rotateZ(-15deg);
+    transform:scale(0) rotateZ(-20deg);
     opacity:0;
   }
   50% {
@@ -438,21 +449,24 @@ h1 {
   }
 }
 
-.rank-text {
-  font-size:15vw;
+.stat-value {
   font-weight:bold;
+  text-shadow:0 0 80px rgba(79,195,255,.8), 0 0 120px rgba(124,255,154,.4);
+  letter-spacing:4px;
+  animation:statGlowPulse 1.5s ease-in-out infinite;
+  filter:drop-shadow(0 0 40px rgba(79,195,255,.6)) drop-shadow(0 0 60px rgba(124,255,154,.3));
+  margin-bottom:12px;
+}
+
+.stat-rank .stat-value {
+  font-size:12vw;
   background:linear-gradient(135deg, var(--accent), var(--accent2), var(--accent));
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
   background-clip:text;
-  text-shadow:0 0 80px rgba(79,195,255,.8), 0 0 120px rgba(124,255,154,.4);
-  letter-spacing:8px;
-  margin-bottom:20px;
-  animation:rankGlowPulse 1.5s ease-in-out infinite;
-  filter:drop-shadow(0 0 40px rgba(79,195,255,.6)) drop-shadow(0 0 60px rgba(124,255,154,.3));
 }
 
-@keyframes rankGlowPulse {
+@keyframes statGlowPulse {
   0%, 100% {
     transform:scale(1);
     filter:drop-shadow(0 0 40px rgba(79,195,255,.6)) drop-shadow(0 0 60px rgba(124,255,154,.3));
@@ -463,24 +477,13 @@ h1 {
   }
 }
 
-.rank-label {
-  font-size:3rem;
-  letter-spacing:4px;
+.stat-label {
+  font-size:1.5rem;
+  letter-spacing:3px;
   color:var(--accent);
   text-shadow:0 0 30px rgba(79,195,255,.8), 0 0 50px rgba(79,195,255,.4);
   font-weight:bold;
-  animation:labelFadeIn 0.8s ease-out 0.3s both;
-}
-
-@keyframes labelFadeIn {
-  from {
-    opacity:0;
-    transform:translateY(20px);
-  }
-  to {
-    opacity:1;
-    transform:translateY(0);
-  }
+  opacity:0.9;
 }
 
 @keyframes revealFadeOut {
@@ -494,6 +497,302 @@ h1 {
     pointer-events:none;
   }
 }
+
+/* 🎮 LEVEL UP ANIMATION */
+#levelUpOverlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:3000;
+  backdrop-filter:blur(3px);
+}
+
+.levelup-popup {
+  text-align:center;
+  animation:levelupBurst 1.2s ease-out forwards;
+}
+
+@keyframes levelupBurst {
+  0% {
+    transform:scale(0) rotateZ(-30deg);
+    opacity:0;
+  }
+  40% {
+    transform:scale(1.15) rotateZ(10deg);
+    opacity:1;
+  }
+  100% {
+    transform:scale(1) rotateZ(0deg);
+    opacity:1;
+  }
+}
+
+.levelup-text {
+  font-size:8vw;
+  font-weight:bold;
+  background:linear-gradient(135deg, #ffff00, #ff6b00, #ff00ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 0 100px rgba(255,255,0,.8);
+  letter-spacing:6px;
+  margin-bottom:20px;
+  filter:drop-shadow(0 0 50px rgba(255,255,0,.6));
+  animation:levelupGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes levelupGlow {
+  0%, 100% { filter:drop-shadow(0 0 50px rgba(255,255,0,.6)) drop-shadow(0 0 80px rgba(255,100,0,.4)); }
+  50% { filter:drop-shadow(0 0 80px rgba(255,255,0,.8)) drop-shadow(0 0 120px rgba(255,100,0,.6)); }
+}
+
+.levelup-new {
+  font-size:4vw;
+  color:var(--accent);
+  font-weight:bold;
+  animation:slideInUp 0.8s ease-out 0.4s both;
+}
+
+@keyframes slideInUp {
+  from { transform:translateY(50px); opacity:0; }
+  to { transform:translateY(0); opacity:1; }
+}
+
+/* 🏆 ACHIEVEMENT BADGE */
+.achievement-popup {
+  position:fixed;
+  top:20px;
+  right:20px;
+  background:linear-gradient(135deg, rgba(20,30,50,.95), rgba(14,22,36,.95));
+  border:2px solid var(--accent2);
+  border-radius:12px;
+  padding:16px 24px;
+  z-index:2500;
+  animation:badgeSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow:0 0 30px rgba(124,255,154,.6), inset 0 0 15px rgba(124,255,154,.2);
+  max-width:300px;
+}
+
+@keyframes badgeSlideIn {
+  from { transform:translateX(400px); opacity:0; }
+  to { transform:translateX(0); opacity:1; }
+}
+
+.achievement-title {
+  color:var(--accent2);
+  font-weight:bold;
+  font-size:1rem;
+  margin-bottom:4px;
+  text-shadow:0 0 10px rgba(124,255,154,.8);
+}
+
+.achievement-text {
+  color:var(--text);
+  font-size:0.9rem;
+  opacity:0.9;
+}
+
+/* 📊 STATUS WINDOW */
+.status-btn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:50px;
+  height:50px;
+  background:linear-gradient(135deg, var(--accent), rgba(79,195,255,.8));
+  border:2px solid var(--accent);
+  border-radius:50%;
+  color:#000;
+  font-weight:bold;
+  cursor:pointer;
+  z-index:1500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.5rem;
+  transition:all 0.3s ease;
+  box-shadow:0 0 20px rgba(79,195,255,.6);
+}
+
+.status-btn:hover {
+  transform:scale(1.1);
+  box-shadow:0 0 30px rgba(79,195,255,.8);
+}
+
+.status-panel {
+  position:fixed;
+  bottom:80px;
+  right:20px;
+  background:linear-gradient(180deg, rgba(14,22,36,.95), rgba(10,17,29,.95));
+  border:2px solid var(--accent);
+  border-radius:12px;
+  padding:20px;
+  width:300px;
+  z-index:1500;
+  box-shadow:0 0 30px rgba(79,195,255,.6);
+  max-height:400px;
+  overflow-y:auto;
+  display:none;
+  animation:panelSlideIn 0.4s ease-out;
+}
+
+@keyframes panelSlideIn {
+  from { opacity:0; transform:translateY(20px); }
+  to { opacity:1; transform:translateY(0); }
+}
+
+.status-panel.show {
+  display:block;
+}
+
+.status-row {
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  border-bottom:1px solid rgba(79,195,255,.2);
+  color:var(--text);
+}
+
+.status-row:last-child {
+  border-bottom:none;
+}
+
+.status-label {
+  color:var(--muted);
+  font-size:0.9rem;
+}
+
+.status-value {
+  color:var(--accent);
+  font-weight:bold;
+}
+
+/* 🪟 FLOATING WINDOWS */
+.floating-window {
+  position:fixed;
+  width:350px;
+  height:450px;
+  background:linear-gradient(135deg, rgba(14,22,36,.95), rgba(20,30,50,.95));
+  border:2px solid var(--accent);
+  border-radius:12px;
+  box-shadow:0 0 40px rgba(79,195,255,.6), inset 0 0 20px rgba(79,195,255,.1);
+  display:none;
+  flex-direction:column;
+  z-index:2000;
+  animation:windowSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+
+.floating-window.fullscreen {
+  width:90vw;
+  height:90vh;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+
+.floating-window.normal {
+  width:350px;
+  height:450px;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+}
+
+@keyframes windowSlideIn {
+  from { opacity:0; transform:translate(-50%, -50%) scale(0.8); }
+  to { opacity:1; transform:translate(-50%, -50%) scale(1); }
+}
+
+@keyframes breathe {
+  0%, 100% { box-shadow:0 0 40px rgba(79,195,255,.6), inset 0 0 20px rgba(79,195,255,.1); }
+  50% { box-shadow:0 0 60px rgba(79,195,255,.8), inset 0 0 30px rgba(79,195,255,.2); }
+}
+
+.floating-window {
+  animation:windowSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards, breathe 3s ease-in-out infinite 0.4s !important;
+}
+
+.window-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:linear-gradient(90deg, rgba(14,22,36,.8), rgba(20,30,50,.8));
+  border-bottom:1px solid var(--accent);
+  flex-shrink:0;
+}
+
+.window-title {
+  color:var(--accent);
+  font-weight:bold;
+  font-size:1.1rem;
+  text-shadow:0 0 10px rgba(79,195,255,.8);
+}
+
+.window-controls {
+  display:flex;
+  gap:8px;
+}
+
+.window-btn {
+  width:32px;
+  height:32px;
+  border:1px solid var(--accent);
+  background:rgba(79,195,255,.1);
+  border-radius:6px;
+  color:var(--accent);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  font-weight:bold;
+}
+
+.window-btn:hover {
+  background:rgba(79,195,255,.3);
+  box-shadow:0 0 15px rgba(79,195,255,.6);
+  transform:scale(1.1);
+}
+
+.window-btn:active {
+  transform:scale(0.95);
+}
+
+.window-content {
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.window-content::-webkit-scrollbar {
+  width:10px;
+}
+
+.window-content::-webkit-scrollbar-track {
+  background:rgba(79,195,255,.05);
+  border-radius:10px;
+}
+
+.window-content::-webkit-scrollbar-thumb {
+  background:linear-gradient(180deg, var(--accent), var(--accent2));
+  border-radius:10px;
+  box-shadow:0 0 12px rgba(79,195,255,.6);
+}
+
+.window-content::-webkit-scrollbar-thumb:hover {
+  box-shadow:0 0 20px rgba(79,195,255,1);
+}
+
 </style>
 </head>
 
@@ -504,10 +803,64 @@ h1 {
   <span id="pwError">Unauthorized Access</span>
 </div>
 
+<div id="levelUpOverlay" style="display:none;">
+  <div class="levelup-popup">
+    <div class="levelup-text">LEVEL UP!</div>
+    <div class="levelup-new">New Level: <span id="newLevelText">2</span></div>
+  </div>
+</div>
+
+<div id="achievementContainer"></div>
+
+<div class="status-panel" id="statusPanel">
+  <div style="color:var(--accent); font-weight:bold; margin-bottom:12px; text-shadow:0 0 10px rgba(79,195,255,.6);">DETAILED STATUS</div>
+  <div class="status-row"><span class="status-label">Level:</span><span class="status-value" id="statusLevel">1</span></div>
+  <div class="status-row"><span class="status-label">Rank:</span><span class="status-value" id="statusRank">E</span></div>
+  <div class="status-row"><span class="status-label">EXP:</span><span class="status-value" id="statusExp">0/100</span></div>
+  <div class="status-row"><span class="status-label">Strength:</span><span class="status-value" id="statusStr">0</span></div>
+  <div class="status-row"><span class="status-label">Endurance:</span><span class="status-value" id="statusEnd">0</span></div>
+  <div class="status-row"><span class="status-label">Soldiers:</span><span class="status-value" id="statusSoldiers">0</span></div>
+  <div class="status-row"><span class="status-label">Power:</span><span class="status-value" id="statusPower">0%</span></div>
+  <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(79,195,255,.2);">
+    <div class="power-bar-container">
+      <div class="power-bar-fill" id="powerBarFill" style="width:0%;"></div>
+    </div>
+  </div>
+</div>
+
 <div id="rankRevealOverlay" style="display:none;">
   <div class="rank-display">
-    <div class="rank-text" id="rankDisplay">E</div>
-    <div class="rank-label">RANK</div>
+    <div class="stat-item stat-rank">
+      <div class="stat-value" id="rankDisplay">E</div>
+      <div class="stat-label">RANK</div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING WINDOWS -->
+<div id="workoutWindow" class="floating-window normal" style="display:none;">
+  <div class="window-header">
+    <div class="window-title">WORKOUT</div>
+    <div class="window-controls">
+      <button class="window-btn" onclick="closeWindow('workoutWindow')">✕</button>
+    </div>
+  </div>
+  <div class="window-content" id="workoutContent"></div>
+</div>
+
+<div id="todoWindow" class="floating-window normal" style="display:none; bottom:480px; flex-direction:column;">
+  <div class="window-header">
+    <div class="window-title">TO DO</div>
+    <div class="window-controls">
+      <button class="window-btn" onclick="closeWindow('todoWindow')">✕</button>
+    </div>
+  </div>
+  <div class="window-content" id="todoContentWindow" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column;">
+    <div id="todoListWindow" class="quests" style="flex:1;"></div>
+    <div class="todo-input" style="margin-top:12px; display:flex; gap:8px; flex-shrink:0;">
+      <input type="text" id="newTaskWindow" placeholder="Add task..." style="flex:1; padding:6px; border-radius:4px; border:1.5px solid #1c2a44; background:rgba(14,22,36,.8); color:var(--text); box-shadow:0 0 10px rgba(79,195,255,.1);">
+      <button id="addBtnWindow" style="padding:6px 10px; border-radius:4px; border:none; background:linear-gradient(135deg, var(--accent), rgba(79,195,255,.8)); color:#000; cursor:pointer; font-weight:bold; box-shadow:0 0 10px rgba(79,195,255,.3); transition:all 0.2s;" onmouseover="this.style.boxShadow='0 0 20px rgba(79,195,255,.6)';" onmouseout="this.style.boxShadow='0 0 10px rgba(79,195,255,.3)';">+</button>
+    </div>
   </div>
 </div>
 
@@ -523,24 +876,9 @@ h1 {
       <div class="card"><div class="label">ENDURANCE</div><div id="end" class="value">0</div></div>
     </div>
 
-    <div class="section">
-      <div class="section-header" onclick="toggleSection('workoutsContent')">
-        Workout <span>&#9660;</span>
-      </div>
-      <div class="section-content" id="workoutsContent"></div>
-    </div>
-
-    <div class="section">
-      <div class="section-header" onclick="toggleSection('todoContent')">
-        To Do <span>&#9660;</span>
-      </div>
-      <div class="section-content" id="todoContent">
-        <div class="todo-input">
-          <input type="text" id="newTask" placeholder="Add new task and press Enter">
-          <button id="addBtn">Add</button>
-        </div>
-        <div id="todoList" class="quests"></div>
-      </div>
+    <div style="margin-top:30px; display:flex; justify-content:center; flex-direction:column; align-items:stretch; gap:12px; width:100%;">
+      <button style="background:linear-gradient(135deg, rgba(79,195,255,.15) 0%, rgba(79,195,255,.05) 100%); color:var(--accent); border:1.5px solid rgba(79,195,255,.4); border-radius:8px; padding:16px 24px; font-size:1.1rem; font-weight:bold; cursor:pointer; transition:all 0.3s; box-shadow:0 0 15px rgba(79,195,255,.2), inset 0 0 8px rgba(79,195,255,.1);" onclick="openWindowFullscreen('workoutWindow')" onmouseover="this.style.boxShadow='0 0 30px rgba(79,195,255,.4), inset 0 0 12px rgba(79,195,255,.2)'; this.style.backgroundColor='rgba(79,195,255,.2)'; this.style.borderColor='rgba(79,195,255,.6)'" onmouseout="this.style.boxShadow='0 0 15px rgba(79,195,255,.2), inset 0 0 8px rgba(79,195,255,.1)'; this.style.backgroundColor='rgba(79,195,255,.05)'; this.style.borderColor='rgba(79,195,255,.4)'">WORKOUT</button>
+      <button style="background:linear-gradient(135deg, rgba(124,255,154,.15) 0%, rgba(124,255,154,.05) 100%); color:var(--accent2); border:1.5px solid rgba(124,255,154,.4); border-radius:8px; padding:16px 24px; font-size:1.1rem; font-weight:bold; cursor:pointer; transition:all 0.3s; box-shadow:0 0 15px rgba(124,255,154,.2), inset 0 0 8px rgba(124,255,154,.1);" onclick="openWindowFullscreen('todoWindow')" onmouseover="this.style.boxShadow='0 0 30px rgba(124,255,154,.4), inset 0 0 12px rgba(124,255,154,.2)'; this.style.backgroundColor='rgba(124,255,154,.2)'; this.style.borderColor='rgba(124,255,154,.6)'" onmouseout="this.style.boxShadow='0 0 15px rgba(124,255,154,.2), inset 0 0 8px rgba(124,255,154,.1)'; this.style.backgroundColor='rgba(124,255,154,.05)'; this.style.borderColor='rgba(124,255,154,.4)'">TO DO</button>
     </div>
 
     <div class="footer">Resets automatically at 00:00</div>
@@ -567,12 +905,72 @@ const overlay = document.getElementById('passwordOverlay');
 const input = document.getElementById('passwordInput');
 const errorMsg = document.getElementById('pwError');
 
+// ========== GLOBAL VARIABLES ==========
+let level=1, exp=0, expNeeded=100, str=0, end=0,
+    completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[], 
+    prevLevel=1, weeklyCompletions=0, totalWorkouts=0;
+
+const motivationalQuotes=[
+  { text: "Discipline is the bridge between goals and accomplishment", author: "Solo Leveling" },
+  { text: "Hunters aren't born. They are made through discipline.", author: "Solo Leveling" },
+  { text: "Pain is just weakness leaving the body.", author: "Solo Leveling" },
+  { text: "You must never give up, no matter what.", author: "Solo Leveling" },
+  { text: "The only way to become stronger is through continuous effort.", author: "Solo Leveling" },
+  { text: "Your limit is not the sky, it's your determination.", author: "Solo Leveling" },
+  { text: "Every setback is a setup for a comeback.", author: "Solo Leveling" },
+  { text: "Success is not final, failure is not fatal.", author: "Solo Leveling" }
+];
+
+const baseQuests=[
+  ['Push-ups',25,'reps'], ['Sit-ups',25,'reps'], ['Squats',25,'reps'],
+  ['Dips',25,'reps'], ['Inverted Rows',25,'reps'], ['Russian Twist',25,'reps'],
+  ['Lunges',25,'reps'], ['Arm Presser (Each Side)',100,'reps'],
+  ['Plank',1,'mins'], ['Left Side Plank',1,'mins'], ['Right Side Plank',1,'mins'],
+  ['Swimming',60,'mins'], ['Cycling / Walking',1,'kms']
+];
+
+const dragLine=document.createElement('div');
+dragLine.className='drag-line';
+
+// ========== WINDOW FUNCTIONS ==========
+window.openWindowFullscreen=function(windowId){
+  const win=document.getElementById(windowId);
+  win.style.animation='none';
+  void win.offsetWidth; // Trigger reflow to reset animation
+  win.classList.add('fullscreen');
+  win.classList.remove('normal');
+  win.style.display='flex';
+  win.style.animation='windowSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
+  if(windowId==='todoWindow') {
+    buildTodo();
+  } else if(windowId==='workoutWindow') {
+    buildQuests();
+  }
+};
+
+window.closeWindow=function(windowId){
+  const win=document.getElementById(windowId);
+  win.style.opacity='0';
+  win.style.transition='opacity 0.3s ease-in';
+  setTimeout(()=>{
+    win.style.display='none';
+    win.style.opacity='1';
+    win.style.transition='none';
+    win.style.animation='none';
+    win.classList.remove('fullscreen');
+    win.classList.add('normal');
+  }, 300);
+};
+
+function toggleStatusPanel(){
+  const panel=document.getElementById('statusPanel');
+  panel.classList.toggle('show');
+}
+
 async function handlePasswordSuccess(){
   overlay.style.display='none';
   const rankOverlay=document.getElementById('rankRevealOverlay');
   rankOverlay.style.display='flex';
-  
-  await initSystem();
   
   setTimeout(()=>{
     rankOverlay.style.animation='revealFadeOut 0.8s ease-in forwards';
@@ -580,7 +978,9 @@ async function handlePasswordSuccess(){
       rankOverlay.style.display='none';
       document.querySelector('.system-container').style.display='flex';
     }, 800);
-  }, 2500);
+  }, 1800);
+
+  await initSystem();
 }
 
 input.addEventListener('keydown', e=>{
@@ -593,41 +993,7 @@ input.addEventListener('keydown', e=>{
   }
 });
 
-async function initSystem(){
-let level=1, exp=0, expNeeded=100, str=0, end=0,
-    completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[];
-
-const levelEl=document.getElementById('level');
-const rankEl=document.getElementById('rank');
-const expEl=document.getElementById('exp');
-const strEl=document.getElementById('str');
-const endEl=document.getElementById('end');
-const todoList=document.getElementById('todoList');
-const newTask=document.getElementById('newTask');
-const addBtn=document.getElementById('addBtn');
-const missedStreak=document.getElementById('missedStreak');
-const currentStreak=document.getElementById('currentStreak');
-
-const baseQuests=[
-  ['Push-ups',25,'reps'], ['Sit-ups',100,'reps'], ['Squats',100,'reps'],
-  ['Dips',100,'reps'], ['Inverted Rows',100,'reps'], ['Russian Twist',100,'reps'],
-  ['Lunges',100,'reps'], ['Arm Presser (Each Side)',100,'reps'],
-  ['Plank',3,'mins'], ['Left Side Plank',3,'mins'], ['Right Side Plank',3,'mins'],
-  ['Swimming',60,'mins'], ['Cycling / Walking',10,'kms']
-];
-
-const dragLine=document.createElement('div');
-dragLine.className='drag-line';
-
-function autoExpandTodo(){
-  const el=document.getElementById('todoContent');
-  if(!el.classList.contains('open')) el.classList.add('open');
-  requestAnimationFrame(()=>{
-    el.style.maxHeight=el.scrollHeight+'px';
-  });
-}
-
-function getMultiplier(){ return (1+(level-1)*0.05)*baseMultiplier; }
+// ========== HELPER FUNCTIONS ==========
 function getRank(totalExp){
   if(totalExp<10000)return'E'; if(totalExp<20000)return'D';
   if(totalExp<30000)return'C'; if(totalExp<40000)return'B';
@@ -636,47 +1002,55 @@ function getRank(totalExp){
   if(totalExp<90000)return'SSS+'; return'∞';
 }
 
-function checkDailyReset(){
-  const today=new Date().toDateString();
-  if(lastResetDate!==today){
-    lastResetDate=today;
-    completed=[];
-    x2Completed=[];
-    todoTasks=todoTasks.filter(task=>!task.done);
-    baseMultiplier+=0.05;
-    saveData();
-    buildQuests();
-    buildTodo();
-    updateUI();
-    updateTimeline();
+function getMultiplier(){
+  return (1+(level-1)*0.05)*baseMultiplier;
+}
+
+function updateStatusPanel(){
+  document.getElementById('statusLevel').textContent=level;
+  document.getElementById('statusRank').textContent=getRank(level*10);
+  document.getElementById('statusExp').textContent=`${exp}/${expNeeded}`;
+  document.getElementById('statusStr').textContent=str;
+  document.getElementById('statusEnd').textContent=end;
+  document.getElementById('statusSoldiers').textContent=totalWorkouts;
+  const power=Math.min(100, Math.floor((completed.length/baseQuests.length)*100));
+  document.getElementById('statusPower').textContent=power+'%';
+  document.getElementById('powerBarFill').style.width=power+'%';
+}
+
+function updateUI(){
+  document.getElementById('level').textContent=level;
+  document.getElementById('rank').textContent=getRank(level*10);
+  document.getElementById('exp').textContent=`${exp} / ${expNeeded}`;
+  document.getElementById('str').textContent=str;
+  document.getElementById('end').textContent=end;
+}
+
+function showAchievement(title, text){
+  const container=document.getElementById('achievementContainer');
+  const badge=document.createElement('div');
+  badge.className='achievement-popup';
+  badge.innerHTML=`<div class="achievement-title">🏆 ${title}</div><div class="achievement-text">${text}</div>`;
+  container.appendChild(badge);
+  setTimeout(()=>{
+    badge.remove();
+  }, 4000);
+}
+
+function checkAchievements(){
+  if(completed.length===5 && !localStorage.getItem('ach_warrior')){
+    localStorage.setItem('ach_warrior','true');
+    showAchievement('Warrior', 'Complete 5 workouts!');
+  }
+  if(level*10>=500 && !localStorage.getItem('ach_veteran')){
+    localStorage.setItem('ach_veteran','true');
+    showAchievement('Veteran', 'Reach 500 EXP!');
   }
 }
 
-setInterval(checkDailyReset, 60000);
-
-async function loadData(){
-  const snap=await get(ref(db,'users/'+userId));
-  const d=snap.val();
-  if(d){
-    level=d.level||1; exp=d.exp||0; expNeeded=d.expNeeded||100;
-    str=d.str||0; end=d.end||0; completed=d.completed||[];
-    streakDays=d.streakDays||0; missedDays=d.missedDays||0;
-    todoTasks=d.todoTasks||[]; lastResetDate=d.lastResetDate||null;
-    baseMultiplier=d.baseMultiplier||1; x2Completed=d.x2Completed||[];
-  }
-  checkDailyReset();
-  const rank=getRank(level*10);
-  document.getElementById('rankDisplay').textContent=rank;
-  buildQuests(); buildTodo(); updateUI(); updateTimeline();
-}
-
-function saveData(){
-  set(ref(db,'users/'+userId),
-    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier,x2Completed});
-}
-
+// ========== QUEST FUNCTIONS ==========
 function buildQuests(){
-  const wrap=document.getElementById('workoutsContent');
+  const wrap=document.getElementById('workoutContent');
   wrap.innerHTML='';
   const m=getMultiplier();
   baseQuests.forEach(([name,val,type])=>{
@@ -698,8 +1072,7 @@ function buildQuests(){
     q.className='quest'+(isDone?' done':'')+(isX2?' x2done':'');
     q.dataset.name=name;
     q.innerHTML=
-      `<div class="check ${isDone?'checked':''}"
-        onclick="toggleQuest(this)"></div>
+      `<div class="check ${isDone?'checked':''}" onclick="toggleQuest(this)"></div>
        <span>${name} – ${displayText}</span>
        <button class="multiplier-btn" onclick="toggleQuestX2(event)">×2</button>`;
     wrap.appendChild(q);
@@ -712,9 +1085,12 @@ window.toggleQuest=function(box){
   if(completed.includes(name) && !x2Completed.includes(name)) return;
   if(x2Completed.includes(name)) return;
   completed.push(name);
+  totalWorkouts++;
+  weeklyCompletions++;
   if(name!=='Swimming'){ str++; end++; exp+=10; }
+  prevLevel=level;
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
-  saveData(); buildQuests(); updateUI(); updateTimeline();
+  saveData(); buildQuests(); updateUI(); updateStatusPanel(); checkAchievements();
 };
 
 window.toggleQuestX2=function(e){
@@ -731,43 +1107,29 @@ window.toggleQuestX2=function(e){
     if(name!=='Swimming'){ str+=1; end+=1; exp+=10; }
   }else{
     completed.push(name);
+    totalWorkouts++;
+    weeklyCompletions++;
     if(name!=='Swimming'){ str+=2; end+=2; exp+=20; }
   }
   
   x2Completed.push(name);
   
+  prevLevel=level;
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
-  saveData(); buildQuests(); updateUI(); updateTimeline();
+  saveData(); buildQuests(); updateUI(); updateStatusPanel(); checkAchievements();
 };
 
-window.toggleSection=function(id){
-  const el=document.getElementById(id);
-  if(el.classList.contains('open')){
-    el.classList.remove('open');
-    el.style.maxHeight='0';
-  }else{
-    el.classList.add('open');
-    el.style.maxHeight=el.scrollHeight+'px';
-  }
-};
-
-function updateUI(){
-  levelEl.textContent=level;
-  rankEl.textContent=getRank(level*10);
-  expEl.textContent=`${exp} / ${expNeeded}`;
-  strEl.textContent=str;
-  endEl.textContent=end;
-}
-
-function updateTimeline(){
-  missedStreak.textContent=`Daily Reset: Active`;
-}
-
-/* -------- TODO (ORIGINAL LOGIC + ADDITIONS ONLY) -------- */
+// ========== TODO FUNCTIONS ==========
 let draggedIndex=-1;
 
+function autoExpandTodo(){
+  const el=document.getElementById('todoListWindow');
+  if(el) el.style.maxHeight=el.scrollHeight+'px';
+}
+
 function buildTodo(){
-  const list=todoList;
+  const list=document.getElementById('todoListWindow');
+  if(!list) return;
   list.innerHTML='';
   todoTasks.forEach((task,index)=>{
     const div=document.createElement('div');
@@ -782,26 +1144,27 @@ function buildTodo(){
       <span class="delete-btn">✕</span>
     `;
 
-    div.querySelector('.check').onclick=()=>{
-      task.done=!task.done; saveData(); buildTodo();
+    div.querySelector('.check').onclick=(e)=>{
+      const checkEl=e.target;
+      task.done=!task.done;
+      checkEl.classList.toggle('checked');
+      div.classList.toggle('done');
+      saveData();
     };
     div.querySelector('.delete-btn').onclick=()=>{
-      todoTasks.splice(index,1); saveData(); buildTodo(); autoExpandTodo();
+      todoTasks.splice(index,1); saveData(); buildTodo();
     };
 
     div.addEventListener('dragstart',e=>{
       draggedIndex=index;
       e.dataTransfer.effectAllowed='move';
-      e.dataTransfer.setData('text/plain',index);
       setTimeout(()=>div.classList.add('dragging'),0);
-      autoExpandTodo();
     });
     
     div.addEventListener('dragend',()=>{
       div.classList.remove('dragging');
       draggedIndex=-1;
       dragLine.remove();
-      list.querySelectorAll('.quest').forEach(q=>q.style.opacity='');
     });
     
     div.addEventListener('dragover',e=>{
@@ -809,27 +1172,16 @@ function buildTodo(){
       e.preventDefault();
       e.dataTransfer.dropEffect='move';
       dragLine.remove();
-      
       const rect=div.getBoundingClientRect();
       const isBottom=e.clientY-rect.top>rect.height/2;
       const currentIndex=parseInt(div.dataset.index);
-      
       if(draggedIndex!==currentIndex){
         isBottom?div.after(dragLine):div.before(dragLine);
       }
-      
-      list.querySelectorAll('.quest').forEach((q,i)=>{
-        if(i!==draggedIndex) q.style.opacity='0.7';
-      });
-    });
-    
-    div.addEventListener('dragleave',()=>{
-      if(!div.contains(e.relatedTarget)) dragLine.remove();
     });
     
     div.addEventListener('drop',e=>{
       e.preventDefault();
-      dragLine.remove();
       const from=draggedIndex;
       const to=parseInt(div.dataset.index);
       
@@ -840,28 +1192,56 @@ function buildTodo(){
       
       saveData();
       buildTodo();
-      autoExpandTodo();
     });
 
     list.appendChild(div);
   });
 }
 
-addBtn.onclick=()=>{
-  const v=newTask.value.trim();
-  if(!v) return;
-  todoTasks.push({text:v,done:false});
-  newTask.value='';
-  saveData(); buildTodo(); autoExpandTodo();
-};
-
-newTask.addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    addBtn.click();
+// ========== DATA FUNCTIONS ==========
+async function loadData(){
+  const snap=await get(ref(db,'users/'+userId));
+  const d=snap.val();
+  if(d){
+    level=d.level||1; exp=d.exp||0; expNeeded=d.expNeeded||100;
+    str=d.str||0; end=d.end||0; completed=d.completed||[];
+    streakDays=d.streakDays||0; missedDays=d.missedDays||0;
+    todoTasks=d.todoTasks||[]; lastResetDate=d.lastResetDate||null;
+    baseMultiplier=d.baseMultiplier||1; x2Completed=d.x2Completed||[];
+    totalWorkouts=d.totalWorkouts||0; prevLevel=level;
   }
-});
+  const rank=getRank(level*10);
+  document.getElementById('rankDisplay').textContent=rank;
+  buildQuests(); buildTodo(); updateUI(); updateStatusPanel();
+}
 
-await loadData();
+function saveData(){
+  set(ref(db,'users/'+userId),
+    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier,x2Completed,totalWorkouts,weeklyCompletions});
+}
+
+// ========== INIT SYSTEM ==========
+async function initSystem(){
+  const addBtnWindow=document.getElementById('addBtnWindow');
+  const newTaskWindow=document.getElementById('newTaskWindow');
+  
+  if(addBtnWindow && newTaskWindow){
+    addBtnWindow.onclick=()=>{
+      const v=newTaskWindow.value.trim();
+      if(!v) return;
+      todoTasks.push({text:v,done:false});
+      newTaskWindow.value='';
+      saveData(); buildTodo();
+    };
+
+    newTaskWindow.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        addBtnWindow.click();
+      }
+    });
+  }
+
+  await loadData();
 }
 </script>
 </body>
