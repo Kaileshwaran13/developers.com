@@ -967,6 +967,27 @@ function toggleStatusPanel(){
   panel.classList.toggle('show');
 }
 
+function showLevelUp() {
+    const overlay = document.getElementById('levelUpOverlay');
+    const newLevelText = document.getElementById('newLevelText');
+    newLevelText.textContent = level; // update the displayed level
+
+    // show overlay
+    overlay.style.display = 'flex';
+
+    // optional: restart animation by forcing reflow
+    const popup = overlay.querySelector('.levelup-popup');
+    popup.style.animation = 'none';
+    void popup.offsetWidth; // trigger reflow
+    popup.style.animation = 'levelupBurst 1.2s ease-out forwards';
+
+    // hide overlay after animation
+    setTimeout(() => {
+        overlay.style.display = 'none';
+    }, 2000);
+}
+
+  
 async function handlePasswordSuccess(){
   overlay.style.display='none';
   const rankOverlay=document.getElementById('rankRevealOverlay');
@@ -1089,7 +1110,7 @@ window.toggleQuest=function(box){
   weeklyCompletions++;
   if(name!=='Swimming'){ str++; end++; exp+=10; }
   prevLevel=level;
-  if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); }
+  if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); showLevelUp(); }
   saveData(); buildQuests(); updateUI(); updateStatusPanel(); checkAchievements();
 };
 
@@ -1246,3 +1267,4 @@ async function initSystem(){
 </script>
 </body>
 </html>
+
