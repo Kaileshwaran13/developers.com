@@ -825,8 +825,7 @@
         ["Plank", 1, "mins"],
         ["Left Side Plank", 1, "mins"],
         ["Right Side Plank", 1, "mins"],
-        ["Swimming", 60, "mins"],
-        ["Cycling / Walking", 1, "kms"],
+        ["Swimming / Cycling / Walking / Running", 60, "mins"],
       ];
       function getRank(lvl) {
         if (lvl < 13) return "E";
@@ -883,7 +882,7 @@
         wrap.innerHTML = "";
         const m = getMultiplier();
         baseQuests.forEach(([name, val, type]) => {
-          let display = name === "Swimming" ? val : Math.round(val * m);
+          let display = name === "Swimming / Cycling / Walking / Running" ? val : Math.round(val * m);
           let displayText;
           if (type === "mins") {
             const totalSeconds = Math.round(display * 60);
@@ -912,7 +911,7 @@
         if (x2Completed.includes(name)) return;
         completed.push(name);
         totalWorkouts++;
-        if (name !== "Swimming") {
+        if (name !== "Swimming / Cycling / Walking / Running") {
           str++;
           end++;
           exp += 10;
@@ -936,7 +935,7 @@
         const wasNormalCompleted =
           completed.includes(name) && !x2Completed.includes(name);
         if (wasNormalCompleted) {
-          if (name !== "Swimming") {
+          if (name !== "Swimming / Cycling / Walking / Running") {
             str += 1;
             end += 1;
             exp += 10;
@@ -944,7 +943,7 @@
         } else {
           completed.push(name);
           totalWorkouts++;
-          if (name !== "Swimming") {
+          if (name !== "Swimming / Cycling / Walking / Running") {
             str += 2;
             end += 2;
             exp += 20;
