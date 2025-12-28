@@ -1069,6 +1069,23 @@ function checkAchievements(){
   }
 }
 
+function checkQuestCompletion() {
+  // Daily Quest
+  const allCompleted = baseQuests.every(q => completed.includes(q[0]));
+  if(allCompleted && !localStorage.getItem('daily_quest_completed')){
+    localStorage.setItem('daily_quest_completed','true');
+    showAchievement('Daily Quest Completed!', 'You have completed all workouts today.');
+  }
+
+  // Strength Quest (×2)
+  const allX2 = baseQuests.every(q => x2Completed.includes(q[0]));
+  if(allX2 && !localStorage.getItem('strength_quest_completed')){
+    localStorage.setItem('strength_quest_completed','true');
+    showAchievement('Strength Quest Completed!', 'You have completed all workouts with ×2 multiplier!');
+  }
+}
+
+  
 // ========== QUEST FUNCTIONS ==========
 function buildQuests(){
   const wrap=document.getElementById('workoutContent');
@@ -1110,6 +1127,8 @@ window.toggleQuest=function(box){
   weeklyCompletions++;
   if(name!=='Swimming'){ str++; end++; exp+=10; }
   prevLevel=level;
+  checkAchievements();
+  checkQuestCompletion();
   if(exp>=expNeeded){ level++; exp=0; expNeeded=Math.floor(expNeeded*1.3); showLevelUp(); }
   saveData(); buildQuests(); updateUI(); updateStatusPanel(); checkAchievements();
 };
@@ -1123,7 +1142,8 @@ window.toggleQuestX2=function(e){
   if(x2Completed.includes(name)) return;
   
   const wasNormalCompleted=completed.includes(name) && !x2Completed.includes(name);
-  
+  checkAchievements();
+  checkQuestCompletion();
   if(wasNormalCompleted){
     if(name!=='Swimming'){ str+=1; end+=1; exp+=10; }
   }else{
@@ -1267,4 +1287,5 @@ async function initSystem(){
 </script>
 </body>
 </html>
+
 
