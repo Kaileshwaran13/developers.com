@@ -909,7 +909,7 @@ const errorMsg = document.getElementById('pwError');
 // ========== GLOBAL VARIABLES ==========
 let level=1, exp=0, expNeeded=100, str=0, end=0,
     completed=[], streakDays=0, missedDays=0, todoTasks=[], lastResetDate=null, baseMultiplier=1, x2Completed=[], 
-    prevLevel=1, weeklyCompletions=0, totalWorkouts=0, monthlyMultiplier=1;
+    prevLevel=1, weeklyCompletions=0, totalWorkouts=0;
 
 const motivationalQuotes=[
   { text: "Discipline is the bridge between goals and accomplishment", author: "Solo Leveling" },
@@ -1025,7 +1025,7 @@ function getRank(totalExp){
 }
 
 function getMultiplier(){
-  return (1+(level-1)*0.05)*baseMultiplier*monthlyMultiplier;
+  return (1+(level-1)*0.05)*baseMultiplier;
 }
 
 function updateStatusPanel(){
@@ -1250,86 +1250,16 @@ async function loadData(){
     streakDays=d.streakDays||0; missedDays=d.missedDays||0;
     todoTasks=d.todoTasks||[]; lastResetDate=d.lastResetDate||null;
     baseMultiplier=d.baseMultiplier||1; x2Completed=d.x2Completed||[];
-    totalWorkouts=d.totalWorkouts||0; prevLevel=level; monthlyMultiplier=d.monthlyMultiplier||1;
+    totalWorkouts=d.totalWorkouts||0; prevLevel=level;
   }
-  checkDailyReset();
-  checkMonthlyIncrement();
   const rank=getRank(level*10);
   document.getElementById('rankDisplay').textContent=rank;
   buildQuests(); buildTodo(); updateUI(); updateStatusPanel();
 }
 
-function checkDailyReset(){
-  const now = new Date();
-  const today = now.toDateString();
-  
-  if(lastResetDate){
-    const lastReset = new Date(lastResetDate);
-    const lastResetDay = lastReset.toDateString();
-    
-    // Check if we've moved to a new day
-    if(today !== lastResetDay){
-      // Reset daily progress
-      completed = [];
-      x2Completed = [];
-      
-      // Update last reset date
-      lastResetDate = now.toISOString();
-      
-      // Clear daily achievement
-      localStorage.removeItem('daily_quest_completed');
-      localStorage.removeItem('strength_quest_completed');
-      
-      // Save the changes
-      saveData();
-    }
-  } else {
-    // First time setting up
-    lastResetDate = now.toISOString();
-    saveData();
-  }
-  
-  // Update the display
-  document.getElementById('missedStreak').textContent = `Daily Reset: Active`;
-}
-
-function checkMonthlyIncrement(){
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  
-  // Check if we have a stored last increment date
-  const lastIncrementKey = 'lastMonthlyIncrement';
-  const lastIncrement = localStorage.getItem(lastIncrementKey);
-  
-  if(lastIncrement){
-    const lastIncDate = new Date(lastIncrement);
-    const lastMonth = lastIncDate.getMonth();
-    const lastYear = lastIncDate.getFullYear();
-    
-    // Check if we've moved to a new month
-    if(currentMonth !== lastMonth || currentYear !== lastYear){
-      // Increase monthly multiplier by 5%
-      monthlyMultiplier *= 1.05;
-      
-      // Store the new increment date
-      localStorage.setItem(lastIncrementKey, now.toISOString());
-      
-      // Show achievement for monthly progression
-      showAchievement('Monthly Progress!', `Workout difficulty increased by 5% (Multiplier: ${monthlyMultiplier.toFixed(2)}x)`);
-      
-      // Save the changes
-      saveData();
-    }
-  } else {
-    // First time setting up
-    localStorage.setItem(lastIncrementKey, now.toISOString());
-  }
-}
-
 function saveData(){
   set(ref(db,'users/'+userId),
-    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier,x2Completed,totalWorkouts,weeklyCompletions,monthlyMultiplier});
+    {level,exp,expNeeded,str,end,completed,streakDays,missedDays,todoTasks,lastResetDate,baseMultiplier,x2Completed,totalWorkouts,weeklyCompletions});
 }
 
 // ========== INIT SYSTEM ==========
